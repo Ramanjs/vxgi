@@ -1,69 +1,67 @@
 #include "utils.h"
 
-int openGLInit(){
-    bool err = glewInit() != GLEW_OK;
-        
-    if (err) {
-        fprintf(stderr, "Failed to initialize OpenGL loader!\n");
-        exit(1);
-    }
+int openGLInit() {
+  bool err = glewInit() != GLEW_OK;
 
-    //Enable multisampling
-    glEnable(GL_MULTISAMPLE);
+  if (err) {
+    fprintf(stderr, "Failed to initialize OpenGL loader!\n");
+    exit(1);
+  }
 
-    // Enable Blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  // Enable multisampling
+  glEnable(GL_MULTISAMPLE);
 
-    // Set point size
-    glPointSize(10.0f);
+  // Enable Blending
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Enable smooth point rendering
-    glEnable(GL_LINE_SMOOTH);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+  // Set point size
+  glPointSize(10.0f);
 
-    return 0;
+  // Enable smooth point rendering
+  glEnable(GL_LINE_SMOOTH);
+  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+  return 0;
 }
 
-static void glfwErrorCallback(int error, const char* description)
-{
-    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+static void glfwErrorCallback(int error, const char *description) {
+  fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
+void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
+  glViewport(0, 0, width, height);
 }
 
-GLFWwindow* setupWindow(int width, int height)
-{
-    // Setup window
-    glfwSetErrorCallback(glfwErrorCallback);
-    if (!glfwInit())
-        exit(1);
+GLFWwindow *setupWindow(int width, int height) {
+  // Setup window
+  glfwSetErrorCallback(glfwErrorCallback);
+  if (!glfwInit())
+    exit(1);
 
-    // Create window with graphics context
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  // Create window with graphics context
+  glfwWindowHint(GLFW_SAMPLES, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(width, height, "VXGI", NULL, NULL);
-    if (window == NULL) {
-        std::cout<<"Failed to create GLFW window"<<std::endl;
-        glfwTerminate();
-        exit(1);
-    }
+  GLFWwindow *window = glfwCreateWindow(width, height, "VXGI", NULL, NULL);
+  if (window == NULL) {
+    std::cout << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    exit(1);
+  }
 
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    glfwSwapInterval(1); // Enable vsync
+  glfwMakeContextCurrent(window);
+  glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+  glfwSwapInterval(1); // Enable vsync
 
-    // Initialize OpenGL loader
-    int status = openGLInit();
-    if(!status){
-        std::cout << "Initialized OpenGL succesfully " << std::endl;
-    }
-    std::cout<< "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+  // Initialize OpenGL loader
+  int status = openGLInit();
+  if (!status) {
+    std::cout << "Initialized OpenGL succesfully " << std::endl;
+  }
+  std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
-    return window;
+  return window;
 }

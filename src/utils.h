@@ -6,6 +6,6 @@
 
 #include <iostream>
 
-GLFWwindow* setupWindow(int width, int height);
+GLFWwindow *setupWindow(int width, int height);
 
 #endif /* ifndef UTILS_H */

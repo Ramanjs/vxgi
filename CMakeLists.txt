@@ -24,6 +24,8 @@ set(SOURCES
 
 add_executable(${TARGET} ${SOURCES})
 
+add_custom_target(format "clang-format" -i ${SOURCES} COMMENT "Formatting source code...")
+
 target_include_directories(${TARGET} PRIVATE
   ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_SOURCE_DIR}/deps/imgui

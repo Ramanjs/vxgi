@@ -14,9 +14,9 @@ find_package(GLEW REQUIRED)
 
 add_subdirectory(deps)
 
-file(GLOB SOURCES
-  "${PROJECT_SOURCE_DIR}/src/*.h"
-  "${PROJECT_SOURCE_DIR}/src/*.cpp"
+set(SOURCES
+  "${PROJECT_SOURCE_DIR}/src/utils.h"
+  "${PROJECT_SOURCE_DIR}/src/main.cpp"
 )
 
 add_executable(${TARGET} ${SOURCES})

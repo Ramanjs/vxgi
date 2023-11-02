@@ -15,8 +15,11 @@ find_package(GLEW REQUIRED)
 add_subdirectory(deps)
 
 set(SOURCES
-  "${PROJECT_SOURCE_DIR}/src/utils.h"
   "${PROJECT_SOURCE_DIR}/src/main.cpp"
+  "${PROJECT_SOURCE_DIR}/src/shader.cpp"
+  "${PROJECT_SOURCE_DIR}/src/shader.h"
+  "${PROJECT_SOURCE_DIR}/src/utils.h"
+  "${PROJECT_SOURCE_DIR}/src/utils.cpp"
 )
 
 add_executable(${TARGET} ${SOURCES})

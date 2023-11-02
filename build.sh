@@ -1,7 +1,7 @@
 #!/bin/bash
 
-mkdir -p build
+cmake -S . -B build
+cmake --build build --target format
 cd build
-cmake ..
 mv compile_commands.json ..
 make -j`${nproc}`

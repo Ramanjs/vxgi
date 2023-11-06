@@ -42,8 +42,9 @@ GLFWwindow *setupWindow(int width, int height) {
   // Create window with graphics context
   glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Create a forward-compatible context (for macOS)
 
   GLFWwindow *window = glfwCreateWindow(width, height, "VXGI", NULL, NULL);
   if (window == NULL) {

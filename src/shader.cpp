@@ -113,26 +113,19 @@ void Shader::use() { glUseProgram(program); }
 void Shader::setUniform(uniformType type, void *param, char *name) {
   GLint loc = glGetUniformLocation(program, name);
 
-  switch (type) {
-  case uniformType::i1:
+  if (type == uniformType::i1) {
     glUniform1i(glGetUniformLocation(program, name), *((int *)param));
-    break;
-  case uniformType::f1:
+  } else if (type == uniformType::f1) {
     glUniform1f(glGetUniformLocation(program, name), *((float *)param));
-    break;
-  case uniformType::fv3:
+  } else if (type == uniformType::fv3) {
     glUniform3fv(glGetUniformLocation(program, name), 1, (float *)param);
-    break;
-  case uniformType::fv4:
+  } else if (type == uniformType::fv4) {
     glUniform4fv(glGetUniformLocation(program, name), 1, (float *)param);
-    break;
-  case uniformType::mat4x4:
+  } else if (type == uniformType::mat4x4) {
     glUniformMatrix4fv(glGetUniformLocation(program, name), 1, GL_FALSE,
                        (float *)param);
-    break;
-  case uniformType::mat3x3:
+  } else if (type == uniformType::mat3x3) {
     glUniformMatrix3fv(glGetUniformLocation(program, name), 1, GL_FALSE,
                        (float *)param);
-    break;
   }
 }

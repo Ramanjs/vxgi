@@ -101,7 +101,7 @@ Shader::Shader(const char *vsPath, const char *fsPath, const char *gsPath) {
   if (fsPath)
     fs = initShader(fsPath, GL_FRAGMENT_SHADER);
   if (gsPath)
-    gs = initShader(fsPath, GL_GEOMETRY_SHADER);
+    gs = initShader(gsPath, GL_GEOMETRY_SHADER);
 
   program = glCreateProgram();
 

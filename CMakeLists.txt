@@ -20,6 +20,8 @@ set(SOURCES
     "${PROJECT_SOURCE_DIR}/src/shader.h"
     "${PROJECT_SOURCE_DIR}/src/utils.h"
     "${PROJECT_SOURCE_DIR}/src/utils.cpp"
+    "${PROJECT_SOURCE_DIR}/src/constants.h"
+    "${PROJECT_SOURCE_DIR}/src/constants.cpp"
 )
 
 add_executable(${TARGET} ${SOURCES})

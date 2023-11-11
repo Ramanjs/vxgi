@@ -1,14 +1,11 @@
 #include "OBJ_Loader.h"
+#include "constants.h"
 #include "shader.h"
 #include "utils.h"
 
 #include <iostream>
 
 void processInput(GLFWwindow *window);
-
-// settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
 
 glm::mat4 modelT, viewT, projectionT;
 
@@ -21,10 +18,12 @@ int main() {
   GLFWwindow *window = setupWindow(SCR_WIDTH, SCR_HEIGHT);
 
   // shaders
-  // Shader shader = Shader("./shaders/vs.vert", "./shaders/fsociety.frag", "./shaders/gshader.gs");
-  // shader.use();
+  // Shader shader = Shader("./shaders/vs.vert", "./shaders/fsociety.frag",
+  // "./shaders/gshader.gs"); shader.use();
 
-  Shader shader = Shader("./shaders/voxelization.vert", "./shaders/voxelization.frag", "./shaders/voxelization.gs");
+  Shader shader =
+      Shader("./shaders/voxelization.vert", "./shaders/voxelization.frag",
+             "./shaders/voxelization.geom");
   shader.use();
 
   objl::Loader loader = objl::Loader();
@@ -93,10 +92,10 @@ int main() {
   GLuint voxelTexture;
   glGenTextures(1, &voxelTexture);
   glBindTexture(GL_TEXTURE_3D, voxelTexture);
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, 128, 128, 128, 0, GL_RGBA, GL_FLOAT, NULL);
+  glTexStorage3D(GL_TEXTURE_3D, 7, GL_RGBA8, 128, 128, 128);
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, 128, 128, 128, 0, GL_RGBA, GL_FLOAT,
+               NULL);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  shader.setUniform(uniformType::i1, 0, "voxelTexture");
-
 
   glm::vec3 lightPosition(10, 10, 10);
   glm::vec3 camPosition(0, 0, 10);

@@ -21,7 +21,10 @@ int main() {
   GLFWwindow *window = setupWindow(SCR_WIDTH, SCR_HEIGHT);
 
   // shaders
-  Shader shader = Shader("./shaders/vs.vert", "./shaders/fsociety.frag");
+  // Shader shader = Shader("./shaders/vs.vert", "./shaders/fsociety.frag", "./shaders/gshader.gs");
+  // shader.use();
+
+  Shader shader = Shader("./shaders/voxelization.vert", "./shaders/voxelization.frag", "./shaders/voxelization.gs");
   shader.use();
 
   objl::Loader loader = objl::Loader();
@@ -85,6 +88,15 @@ int main() {
   shader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
   shader.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
   shader.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT), "P");
+
+  // create texture for voxelization
+  GLuint voxelTexture;
+  glGenTextures(1, &voxelTexture);
+  glBindTexture(GL_TEXTURE_3D, voxelTexture);
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, 128, 128, 128, 0, GL_RGBA, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  shader.setUniform(uniformType::i1, 0, "voxelTexture");
+
 
   glm::vec3 lightPosition(10, 10, 10);
   glm::vec3 camPosition(0, 0, 10);

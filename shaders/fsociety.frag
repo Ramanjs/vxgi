@@ -6,6 +6,8 @@ in vec3 normalFrag;
 uniform vec3 camPosition;
 uniform vec3 lightPosition;
 
+layout(RGBA8) uniform image3D voxelData;
+
 out vec4 outColor;
 
 vec3 Ls = vec3(1.0, 1.0, 1.0);
@@ -33,8 +35,13 @@ vec3 Is = ks * Ls * max(pow(max(dot(v, r), 0), spec_exp), 0);
 
 vec3 fColor = Ia + Id + Is;
 
+
 void main() {
     outColor = vec4(fColor, 1.0);
 
-    // Store voxel 
+    // Store the voxel in the appropriate texture location
+    ivec3 voxelSize = imageSize(voxelData); // get the size of the voxel texture
+    vec3 normalizedFrag = (worldPositionFrag + vec3(1.0)) / 2.0; // transform the world pos from [-1, +1] to [0, 1]
+    ivec3 voxelPos = ivec3(normalizedFrag * voxelSize); // get the position of the voxel
+    imageStore(voxelData, voxelPos, outColor);
 }

@@ -31,12 +31,13 @@ add_custom_target(format "clang-format" -i ${SOURCES} COMMENT "Formatting source
 target_include_directories(${TARGET} PRIVATE
 ${PROJECT_SOURCE_DIR}/src
 ${PROJECT_SOURCE_DIR}/deps/imgui
+${PROJECT_SOURCE_DIR}/deps/tinyobjloader
 ${GLFW_INCLUDE_DIRS}
 ${OPENGL_INCLUDE_DIR}
 ${GLM_INCLUDE_DIRS/../include}
 )
 
-target_link_libraries(${TARGET} ${OPENGL_LIBRARIES} glfw GLEW::GLEW imgui)
+target_link_libraries(${TARGET} ${OPENGL_LIBRARIES} glfw GLEW::GLEW imgui tinyobjloader)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")

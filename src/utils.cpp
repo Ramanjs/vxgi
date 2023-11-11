@@ -8,6 +8,10 @@ int openGLInit() {
     exit(1);
   }
 
+  // Enable depth buffer
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+
   // Enable multisampling
   glEnable(GL_MULTISAMPLE);
 

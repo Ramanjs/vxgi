@@ -11,7 +11,8 @@ out vec3 worldPositionFrag;
 out vec3 normalFrag;
 
 void main() {
-    gl_Position = P*V*M * vec4(aPos, 1.0);
     worldPositionFrag = vec3(M * vec4(aPos, 1.0));
-    normalFrag = normalize(mat3(transpose(inverse(M))) * normalize(aNorm));
+    normalFrag = normalize(mat3( transpose(inverse(M)) ) * normalize(aNorm));
+    
+    gl_Position = P*V*M * vec4(aPos, 1.0);
 }

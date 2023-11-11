@@ -35,4 +35,6 @@ vec3 fColor = Ia + Id + Is;
 
 void main() {
     outColor = vec4(fColor, 1.0);
+
+    // Store voxel 
 }

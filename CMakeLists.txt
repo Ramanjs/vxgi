@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.22)
 
 project(vxgi VERSION 1.0)
 
@@ -37,5 +37,5 @@ ${GLM_INCLUDE_DIRS/../include}
 target_link_libraries(${TARGET} ${OPENGL_LIBRARIES} glfw GLEW::GLEW imgui)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-extensions")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()

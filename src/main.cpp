@@ -13,18 +13,60 @@ void setupModelTransformation();
 void setupViewTransformation();
 void setupProjectionTransformation();
 
+void renderCubes(GLubyte *imageData, Shader &emitShader, GLuint cubeVAO,
+                 GLuint meshSize) {
+  int w, h, d;
+  w = h = d = SCR_WIDTH;
+
+  int idx = 0;
+  glm::vec4 emitColor;
+  glm::vec3 offset(1.0f / w, 1.0f / w, 1.0f / w);
+  for (int x = 0; x < w; x++) {
+    for (int y = 0; y < h; y++) {
+      for (int z = 0; z < d; z++) {
+        idx = 4 * (x + y * w + z * w * w);
+        float alpha = (float)imageData[idx + 3];
+        if (imageData[idx] > 0.0f) {
+          std::cout << "Red: " << imageData[idx] << std::endl;
+        }
+        if (imageData[idx + 1] > 0.0f) {
+          std::cout << "Green: " << imageData[idx + 1] << std::endl;
+        }
+        if (imageData[idx + 2] > 0.0f) {
+          std::cout << "Blue: " << imageData[idx + 2] << std::endl;
+        }
+
+        if (alpha > 0.0f) {
+          emitColor =
+              glm::vec4(imageData[idx] / 255.0f, imageData[idx + 1] / 255.0f,
+                        imageData[idx + 2] / 255.0f, 1.0f);
+          glm::vec3 pos =
+              offset + glm::vec3(x * (2.0 / w), y * (2.0 / w), z * (2.0 / w)) +
+              -1.0f;
+          modelT = glm::translate(glm::mat4(1.0f), pos) *
+                   glm::scale(glm::mat4(1.0f), glm::vec3(2.0f / w));
+
+          emitShader.use();
+          emitShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT),
+                                "M");
+          emitShader.setUniform(uniformType::mat4x4, glm::value_ptr(viewT),
+                                "V");
+          emitShader.setUniform(uniformType::mat4x4,
+                                glm::value_ptr(projectionT), "P");
+          emitShader.setUniform(uniformType::fv4, glm::value_ptr(emitColor),
+                                "emitColor");
+          glBindVertexArray(cubeVAO);
+          glDrawElements(GL_TRIANGLES, meshSize, GL_UNSIGNED_INT, 0);
+        }
+      }
+    }
+  }
+}
+
 int main() {
 
   GLFWwindow *window = setupWindow(SCR_WIDTH, SCR_HEIGHT);
-
-  // shaders
-  // Shader shader = Shader("./shaders/vs.vert", "./shaders/fsociety.frag",
-  // "./shaders/gshader.gs"); shader.use();
-
-  Shader shader =
-      Shader("./shaders/voxelization.vert", "./shaders/voxelization.frag",
-             "./shaders/voxelization.geom");
-  shader.use();
+  glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
   objl::Loader loader = objl::Loader();
   bool loaded = loader.LoadFile("assets/bunny.obj");
@@ -51,6 +93,16 @@ int main() {
   for (int i = 0; i < mesh.Indices.size(); i++) {
     indices[i] = mesh.Indices[i];
   }
+
+  /* VOXELIZE */
+  glm::vec3 lightPosition(10, 10, 10);
+  glm::vec3 camPosition(0, 0, 10);
+
+  // init shader
+  Shader shader =
+      Shader("./shaders/voxelization.vert", "./shaders/voxelization.frag",
+             "./shaders/voxelization.geom");
+  shader.use();
 
   // VBO, VAO
   GLuint VBO, VAO, EBO, nVBO;
@@ -88,24 +140,92 @@ int main() {
   shader.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
   shader.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT), "P");
 
-  // create texture for voxelization
-  GLuint voxelTexture;
-  glGenTextures(1, &voxelTexture);
-  glBindTexture(GL_TEXTURE_3D, voxelTexture);
-  glTexStorage3D(GL_TEXTURE_3D, 7, GL_RGBA8, 128, 128, 128);
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, 128, 128, 128, 0, GL_RGBA, GL_FLOAT,
-               NULL);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-  glm::vec3 lightPosition(10, 10, 10);
-  glm::vec3 camPosition(0, 0, 10);
   shader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
                     "lightPosition");
   shader.setUniform(uniformType::fv3, glm::value_ptr(camPosition),
                     "camPosition");
 
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  // create texture for voxelization
+  GLuint voxelTexture;
+  std::vector<GLubyte> clearBuffer(4 * SCR_WIDTH * SCR_WIDTH * SCR_WIDTH, 0);
+
+  glGenTextures(1, &voxelTexture);
+  glBindTexture(GL_TEXTURE_3D, voxelTexture);
+  // glTexStorage3D(GL_TEXTURE_3D, 7, GL_RGBA8, SCR_WIDTH, SCR_WIDTH,
+  // SCR_WIDTH);
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, SCR_WIDTH, SCR_WIDTH, SCR_WIDTH, 0,
+               GL_RGBA, GL_UNSIGNED_BYTE, &clearBuffer[0]);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER,
+                  GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_BLEND);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindImageTexture(0, voxelTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+  glBindVertexArray(VAO);
+  glDrawElements(GL_TRIANGLES, mesh.Indices.size(), GL_UNSIGNED_INT, 0);
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+
+  // glGenerateMipmap(GL_TEXTURE_3D);
+
+  // TODO: fetch from GPU
+  GLubyte *imageData = (GLubyte *)malloc(sizeof(GLubyte) * 4 * SCR_WIDTH *
+                                         SCR_WIDTH * SCR_WIDTH);
+  glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+  /* VOXELIZE */
+
+  /* VISUALIZATION */
+  // load cube from obj file
+  loaded = loader.LoadFile("assets/cube.obj");
+  if (!loaded) {
+    std::cout << "Failed to load mesh" << std::endl;
+    exit(1);
+  }
+
+  Shader emitShader = Shader("shaders/emit.vert", "shaders/emit.frag");
+  emitShader.use();
+
+  // make VOXEL_DIM^3 cubes
+  mesh = loader.LoadedMeshes[0];
+  std::cout << mesh.MeshName << std::endl;
+  GLfloat *cubeV = new GLfloat[3 * mesh.Vertices.size()];
+  GLuint *cubeI = new GLuint[mesh.Indices.size()];
+
+  for (int i = 0; i < mesh.Vertices.size(); i++) {
+    cubeV[3 * i] = mesh.Vertices[i].Position.X;
+    cubeV[3 * i + 1] = mesh.Vertices[i].Position.Y;
+    cubeV[3 * i + 2] = mesh.Vertices[i].Position.Z;
+  }
+
+  for (int i = 0; i < mesh.Indices.size(); i++) {
+    cubeI[i] = mesh.Indices[i];
+  }
+
+  GLuint cubeVAO, cubeVBO, cubeEBO;
+  glGenVertexArrays(1, &cubeVAO);
+  glGenBuffers(1, &cubeVBO);
+  glGenBuffers(1, &cubeEBO);
+
+  glBindVertexArray(cubeVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cubeV), cubeV, GL_STATIC_DRAW);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeEBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeI), cubeI, GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+  /* VISUALIZATION */
 
   while (!glfwWindowShouldClose(window)) {
     processInput(window);
@@ -113,9 +233,7 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    shader.use();
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, mesh.Indices.size(), GL_UNSIGNED_INT, 0);
+    renderCubes(imageData, emitShader, cubeVAO, mesh.Indices.size());
 
     glfwSwapBuffers(window);
     glfwPollEvents();

@@ -26,33 +26,29 @@ void renderCubes(GLubyte *imageData, Shader &emitShader, GLuint cubeVAO,
       for (int z = 0; z < d; z++) {
         idx = 4 * (x + y * w + z * w * w);
         float alpha = (float)imageData[idx + 3];
-        if (imageData[idx] > 0.0f) {
-          std::cout << "Red: " << imageData[idx] << std::endl;
-        }
-        if (imageData[idx + 1] > 0.0f) {
-          std::cout << "Green: " << imageData[idx + 1] << std::endl;
-        }
-        if (imageData[idx + 2] > 0.0f) {
-          std::cout << "Blue: " << imageData[idx + 2] << std::endl;
-        }
+        /*        if (imageData[idx] > 0.0f) {*/
+        /*std::cout << "Red: " << imageData[idx] << std::endl;*/
+        /*}*/
+        /*if (imageData[idx + 1] > 0.0f) {*/
+        /*std::cout << "Green: " << imageData[idx + 1] << std::endl;*/
+        /*}*/
+        /*if (imageData[idx + 2] > 0.0f) {*/
+        /*std::cout << "Blue: " << imageData[idx + 2] << std::endl;*/
+        /*}*/
 
         if (alpha > 0.0f) {
-          emitColor =
-              glm::vec4(imageData[idx] / 255.0f, imageData[idx + 1] / 255.0f,
-                        imageData[idx + 2] / 255.0f, 1.0f);
+          emitColor = glm::vec4(((float)imageData[idx]) / 255.0f,
+                                ((float)imageData[idx + 1]) / 255.0f,
+                                ((float)imageData[idx + 2]) / 255.0f, 1.0f);
           glm::vec3 pos =
               offset + glm::vec3(x * (2.0 / w), y * (2.0 / w), z * (2.0 / w)) +
-              -1.0f;
+              glm::vec3(-1.0f);
           modelT = glm::translate(glm::mat4(1.0f), pos) *
                    glm::scale(glm::mat4(1.0f), glm::vec3(2.0f / w));
 
           emitShader.use();
           emitShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT),
                                 "M");
-          emitShader.setUniform(uniformType::mat4x4, glm::value_ptr(viewT),
-                                "V");
-          emitShader.setUniform(uniformType::mat4x4,
-                                glm::value_ptr(projectionT), "P");
           emitShader.setUniform(uniformType::fv4, glm::value_ptr(emitColor),
                                 "emitColor");
           glBindVertexArray(cubeVAO);
@@ -182,32 +178,32 @@ int main() {
                                          SCR_WIDTH * SCR_WIDTH);
   glGetTexImage(GL_TEXTURE_3D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
 
-  int w, h, d;
-  w = h = d = SCR_WIDTH;
+  // int w, h, d;
+  // w = h = d = SCR_WIDTH;
 
-  int idx = 0;
-  glm::vec4 emitColor;
-  for (int x = 0; x < w; x++) {
-    for (int y = 0; y < h; y++) {
-      for (int z = 0; z < d; z++) {
-        idx = 4 * (x + y * w + z * w * w);
-        float alpha = (float)imageData[idx + 3];
-        if ((float)imageData[idx] > 0.0f) {
-          std::cout << "Red: " << (float)imageData[idx] << std::endl;
-        }
-        if ((float)imageData[idx + 1] > 0.0f) {
-          std::cout << "Green: " << (float)imageData[idx + 1] << std::endl;
-        }
-        if ((float)imageData[idx + 2] > 0.0f) {
-          std::cout << "Blue: " << (float)imageData[idx + 2] << std::endl;
-        }
+  // int idx = 0;
+  // glm::vec4 emitColor;
+  // for (int x = 0; x < w; x++) {
+  // for (int y = 0; y < h; y++) {
+  // for (int z = 0; z < d; z++) {
+  // idx = 4 * (x + y * w + z * w * w);
+  // float alpha = (float)imageData[idx + 3];
+  // if ((float)imageData[idx] > 0.0f) {
+  // std::cout << "Red: " << (float)imageData[idx] << std::endl;
+  //}
+  // if ((float)imageData[idx + 1] > 0.0f) {
+  // std::cout << "Green: " << (float)imageData[idx + 1] << std::endl;
+  //}
+  // if ((float)imageData[idx + 2] > 0.0f) {
+  // std::cout << "Blue: " << (float)imageData[idx + 2] << std::endl;
+  //}
 
-        if (alpha > 0.0f) {
-          std::cout << "Alpha: " << (float)imageData[idx + 3] << std::endl;
-        }
-      }
-    }
-  }
+  // if (alpha > 0.0f) {
+  // std::cout << "Alpha: " << (float)imageData[idx + 3] << std::endl;
+  //}
+  //}
+  //}
+  //}
   /* VOXELIZE */
 
   /* VISUALIZATION */
@@ -259,6 +255,10 @@ int main() {
 
   Shader vis = Shader("shaders/voxelization.vert", "shaders/vis.frag");
   vis.use();
+  vis.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+  vis.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
+  vis.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT), "P");
+  vis.setUniform(uniformType::i1, &vt, "voxelTexture");
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_3D, voxelTexture);
 
@@ -268,11 +268,12 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // renderCubes(imageData, emitShader, cubeVAO, mesh.Indices.size());
     vis.use();
     glBindTexture(GL_TEXTURE_3D, voxelTexture);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, mesh.Indices.size(), GL_UNSIGNED_INT, 0);
+
+    // renderCubes(imageData, emitShader, cubeVAO, mesh.Indices.size());
 
     glfwSwapBuffers(window);
     glfwPollEvents();

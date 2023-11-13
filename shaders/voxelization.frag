@@ -46,7 +46,7 @@ void main() {
     normalizedFrag.z *= 512;
     ivec3 voxelPos = ivec3(normalizedFrag); // get the position of the voxel
 
-    if (200 <= voxelPos.x && voxelPos.x < 512 && 200 <= voxelPos.y && voxelPos.y < 512 && 200 <= voxelPos.z && voxelPos.z < 512) {
+    if (0 <= voxelPos.x && voxelPos.x < 512 && 0 <= voxelPos.y && voxelPos.y < 512 && 0 <= voxelPos.z && voxelPos.z < 512) {
         outColor = vec4(fColor, 1.0);
     } else {
         outColor = vec4(0, 0, 0, 1);

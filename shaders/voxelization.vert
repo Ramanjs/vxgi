@@ -7,12 +7,12 @@ uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
 
-out vec3 worldPosition;
-out vec3 normal;
+out vec3 worldPositionFrag;
+out vec3 normalFrag;
 
 void main() {
-    worldPosition = vec3(M * vec4(aPos, 1.0));
-    normal = normalize(mat3( transpose(inverse(M)) ) * normalize(aNorm));
+    worldPositionFrag = vec3(M * vec4(aPos, 1.0));
+    normalFrag = normalize(mat3( transpose(inverse(M)) ) * normalize(aNorm));
     
-    gl_Position = P*V* vec4(worldPosition, 1.0);
+    gl_Position = P*V* vec4(worldPositionFrag, 1.0);
 }

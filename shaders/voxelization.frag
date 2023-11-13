@@ -38,11 +38,18 @@ void main() {
 
 
 
-    outColor = vec4(fColor, 1.0);
 
     // Store the voxel in the appropriate texture location
-    ivec3 voxelSize = imageSize(voxelTexture); // get the size of the voxel texture
-    vec3 normalizedFrag = (worldPositionFrag + vec3(1.0)) / 2.0; // transform the world pos from [-1, +1] to [0, 1]
-    ivec3 voxelPos = ivec3(normalizedFrag * voxelSize); // get the position of the voxel
+    //ivec3 voxelSize = imageSize(voxelTexture); // get the size of the voxel texture
+    //vec3 normalizedFrag = (worldPositionFrag + vec3(1.0)) / 2.0; // transform the world pos from [-1, +1] to [0, 1]
+    vec3 normalizedFrag = gl_FragCoord.xyz;
+    normalizedFrag.z *= 512;
+    ivec3 voxelPos = ivec3(normalizedFrag); // get the position of the voxel
+
+    if (200 <= voxelPos.x && voxelPos.x < 512 && 200 <= voxelPos.y && voxelPos.y < 512 && 200 <= voxelPos.z && voxelPos.z < 512) {
+        outColor = vec4(fColor, 1.0);
+    } else {
+        outColor = vec4(0, 0, 0, 1);
+    }
     imageStore(voxelTexture, voxelPos, outColor);
 }

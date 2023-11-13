@@ -151,9 +151,9 @@ int main() {
   std::vector<GLubyte> clearBuffer(4 * SCR_WIDTH * SCR_WIDTH * SCR_WIDTH, 0);
 
   glGenTextures(1, &voxelTexture);
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_3D, voxelTexture);
-  // glTexStorage3D(GL_TEXTURE_3D, 7, GL_RGBA8, SCR_WIDTH, SCR_WIDTH,
-  // SCR_WIDTH);
+  glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, SCR_WIDTH, SCR_WIDTH, SCR_WIDTH);
   glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, SCR_WIDTH, SCR_WIDTH, SCR_WIDTH, 0,
                GL_RGBA, GL_UNSIGNED_BYTE, &clearBuffer[0]);
   // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER,
@@ -164,7 +164,6 @@ int main() {
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_BLEND);
 
-  glActiveTexture(GL_TEXTURE0);
   glBindImageTexture(0, voxelTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, mesh.Indices.size(), GL_UNSIGNED_INT, 0);
@@ -193,18 +192,18 @@ int main() {
       for (int z = 0; z < d; z++) {
         idx = 4 * (x + y * w + z * w * w);
         float alpha = (float)imageData[idx + 3];
-        if (imageData[idx] > 0.0f) {
-          std::cout << "Red: " << imageData[idx] << std::endl;
+        if ((float)imageData[idx] > 0.0f) {
+          std::cout << "Red: " << (float)imageData[idx] << std::endl;
         }
-        if (imageData[idx + 1] > 0.0f) {
-          std::cout << "Green: " << imageData[idx + 1] << std::endl;
+        if ((float)imageData[idx + 1] > 0.0f) {
+          std::cout << "Green: " << (float)imageData[idx + 1] << std::endl;
         }
-        if (imageData[idx + 2] > 0.0f) {
-          std::cout << "Blue: " << imageData[idx + 2] << std::endl;
+        if ((float)imageData[idx + 2] > 0.0f) {
+          std::cout << "Blue: " << (float)imageData[idx + 2] << std::endl;
         }
 
         if (alpha > 0.0f) {
-          std::cout << "Alpha: " << imageData[idx + 3] << std::endl;
+          std::cout << "Alpha: " << (float)imageData[idx + 3] << std::endl;
         }
       }
     }
@@ -258,6 +257,11 @@ int main() {
   /*glBindVertexArray(0);*/
   /* VISUALIZATION */
 
+  Shader vis = Shader("shaders/voxelization.vert", "shaders/vis.frag");
+  vis.use();
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_3D, voxelTexture);
+
   while (!glfwWindowShouldClose(window)) {
     processInput(window);
 
@@ -265,7 +269,8 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // renderCubes(imageData, emitShader, cubeVAO, mesh.Indices.size());
-    shader.use();
+    vis.use();
+    glBindTexture(GL_TEXTURE_3D, voxelTexture);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, mesh.Indices.size(), GL_UNSIGNED_INT, 0);
 

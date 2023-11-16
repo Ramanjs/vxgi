@@ -39,7 +39,6 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
 
     std::string texturePath = textureDir;
     texturePath += mp->diffuse_texname;
-    std::cout << "Texture path: " << texturePath << std::endl;
     unsigned char *image =
         stbi_load(texturePath.c_str(), &w, &h, &comp, STBI_default);
     if (!image) {
@@ -53,7 +52,8 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
 
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     if (comp == 3) {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE,
@@ -157,8 +157,6 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    std::cout << shapes[s].name << " triangles: " << mesh.numTriangles
-              << std::endl;
     mesh.numTriangles = buffer.size() / (3 + 3 + 2) / 3;
 
     meshes.push_back(mesh);
@@ -176,7 +174,6 @@ void Scene::draw(Shader &shader) {
     if ((mesh.materialId < materials.size())) {
       std::string diffuse_texname = materials[mesh.materialId].diffuse_texname;
       if (textures.find(diffuse_texname) != textures.end()) {
-        // std::cout << "Binded texture: " << diffuse_texname << std::endl;
         glBindTexture(GL_TEXTURE_2D, textures[diffuse_texname]);
       }
     }

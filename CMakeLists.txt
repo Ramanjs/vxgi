@@ -25,6 +25,8 @@ set(SOURCES
     "${PROJECT_SOURCE_DIR}/src/scene.cpp"
     "${PROJECT_SOURCE_DIR}/src/constants.h"
     "${PROJECT_SOURCE_DIR}/src/constants.cpp"
+    "${PROJECT_SOURCE_DIR}/src/camera.h"
+    "${PROJECT_SOURCE_DIR}/src/camera.cpp"
 )
 
 add_executable(${TARGET} ${SOURCES})

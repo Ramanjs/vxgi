@@ -9,6 +9,7 @@
 void processInput(GLFWwindow *window);
 void mouseCallback(GLFWwindow *window, double xposIn, double yposIn);
 void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+void setupModelTransformation();
 void renderQuad();
 
 glm::mat4 modelT;
@@ -22,25 +23,15 @@ bool firstMouse = true;
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
-void setupModelTransformation();
-
 int main() {
 
   GLFWwindow *window = setupWindow(SCR_WIDTH, SCR_HEIGHT);
 
-  Shader shader = Shader("shaders/scene.vert", "shaders/scene.frag");
-  shader.use();
-
-  setupModelTransformation();
-  shader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
-
   Scene scene = Scene();
   scene.loadObj("assets/crytek-sponza/", "assets/crytek-sponza/sponza.obj");
+  setupModelTransformation();
 
-  glfwSetCursorPosCallback(window, mouseCallback);
-  glfwSetScrollCallback(window, scrollCallback);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+  /* DEPTH MAP */
   GLuint depthMapFBO;
   glGenFramebuffers(1, &depthMapFBO);
 
@@ -83,15 +74,89 @@ int main() {
   glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
   glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
   glClear(GL_DEPTH_BUFFER_BIT);
-  scene.draw(depthShader);
+  scene.draw(depthShader, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // reset viewport
   glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  /* DEPTH MAP */
 
-  // Shader debugDepthShader =
-  // Shader("shaders/debugDepthMap.vert", "shaders/debugDepthMap.frag");
+  /* VOXELIZATION */
+  Shader voxelizeShader =
+      Shader("shaders/voxelization.vert", "shaders/voxelization.frag",
+             "shaders/voxelization.geom");
+  voxelizeShader.use();
+
+  voxelizeShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+
+  // create texture for voxelization
+  GLuint voxelTexture;
+  std::vector<GLubyte> clearBuffer(4 * VOXEL_DIM * VOXEL_DIM * VOXEL_DIM, 0);
+
+  glGenTextures(1, &voxelTexture);
+  glBindTexture(GL_TEXTURE_3D, voxelTexture);
+  glTexStorage3D(GL_TEXTURE_3D, 7, GL_RGBA8, VOXEL_DIM, VOXEL_DIM, VOXEL_DIM);
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, VOXEL_DIM, VOXEL_DIM, VOXEL_DIM, 0,
+               GL_RGBA, GL_UNSIGNED_BYTE, &clearBuffer[0]);
+
+  // LOD settings for mipmapping.
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER,
+                  GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  glGenerateMipmap(GL_TEXTURE_3D);
+  glBindTexture(GL_TEXTURE_3D, voxelTexture);
+
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_BLEND);
+
+  glBindImageTexture(0, voxelTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+  int voxelTextureUnit = 0;
+  voxelizeShader.setUniform(uniformType::i1, &voxelTextureUnit, "voxelTexture");
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_3D, voxelTexture);
+  glm::vec3 worldCenter = scene.getWorldCenter();
+  float worldSizeHalf = 0.5f * scene.getWorldSize();
+  voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(worldCenter),
+                            "worldCenter");
+  voxelizeShader.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
+  voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
+                            "lightPosition");
+  voxelizeShader.setUniform(uniformType::mat4x4,
+                            glm::value_ptr(lightSpaceMatrix),
+                            "lightSpaceMatrix");
+  int shadowMapUnit = 2;
+  voxelizeShader.setUniform(uniformType::i1, &shadowMapUnit, "shadowMap");
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, depthMap);
+  glViewport(0, 0, VOXEL_DIM, VOXEL_DIM);
+  scene.draw(voxelizeShader, 1);
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+  glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glfwSetCursorPosCallback(window, mouseCallback);
+  glfwSetScrollCallback(window, scrollCallback);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  /* VOXELIZATION */
+
+  Shader vis = Shader("shaders/vis.vert", "shaders/vis.frag");
+  vis.use();
+  vis.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+  vis.setUniform(uniformType::fv3, glm::value_ptr(worldCenter), "worldCenter");
+  vis.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
+  voxelTextureUnit = 0;
+  vis.setUniform(uniformType::i1, &voxelTextureUnit, "voxelTexture");
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
@@ -103,30 +168,25 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // debugDepthShader.use();
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, depthMap);
-    // renderQuad();
-
-    shader.use();
+    vis.use();
     glm::mat4 viewT = camera.getViewMatrix();
-    shader.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
+    vis.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
 
     glm::mat4 projectionT = glm::perspective(
         glm::radians(camera.zoom), (GLfloat)SCR_WIDTH / (GLfloat)SCR_HEIGHT,
         0.1f, 5000.0f);
-    shader.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT), "P");
-    shader.setUniform(uniformType::mat4x4, glm::value_ptr(lightSpaceMatrix),
-                      "lightSpaceMatrix");
-    shader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
-                      "lightPosition");
+    vis.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT), "P");
+    vis.setUniform(uniformType::mat4x4, glm::value_ptr(lightSpaceMatrix),
+                   "lightSpaceMatrix");
+    vis.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
+                   "lightPosition");
     int sh = 1, tx = 0;
-    shader.setUniform(uniformType::i1, &tx, "tex");
-    shader.setUniform(uniformType::i1, &sh, "shadowMap");
+    vis.setUniform(uniformType::i1, &tx, "tex");
+    vis.setUniform(uniformType::i1, &sh, "shadowMap");
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthMap);
 
-    scene.draw(shader);
+    scene.draw(vis, false);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

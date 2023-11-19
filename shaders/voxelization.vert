@@ -2,17 +2,20 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNorm;
+layout (location = 2) in vec2 aTex;
 
 uniform mat4 M;
-uniform mat4 V;
-uniform mat4 P;
+uniform mat4 lightSpaceMatrix;
 
-out vec3 worldPositionFrag;
-out vec3 normalFrag;
+out vec3 worldPositionGeom;
+out vec3 normalGeom;
+out vec2 texCoordGeom;
+out vec4 lightSpacePosGeom;
 
 void main() {
-    worldPositionFrag = vec3(M * vec4(aPos, 1.0));
-    normalFrag = normalize(mat3( transpose(inverse(M)) ) * normalize(aNorm));
-    
-    gl_Position = P*V* vec4(worldPositionFrag, 1.0);
+    worldPositionGeom = vec3(M * vec4(aPos, 1.0));
+    normalGeom = transpose(inverse(mat3(M))) * aNorm;
+    lightSpacePosGeom = lightSpaceMatrix * vec4(worldPositionGeom, 1.0);
+    texCoordGeom = aTex;
+    gl_Position = vec4(worldPositionGeom, 1.0);
 }

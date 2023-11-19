@@ -170,6 +170,7 @@ void Scene::draw(Shader &shader) {
     Mesh mesh = meshes[i];
 
     glBindVertexArray(mesh.vao);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
     if ((mesh.materialId < materials.size())) {
       std::string diffuse_texname = materials[mesh.materialId].diffuse_texname;

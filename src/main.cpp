@@ -54,7 +54,7 @@ int main() {
   glReadBuffer(GL_NONE);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  glm::vec3 lightPosition(100.0f, 2000.0f, 150.0f);
+  glm::vec3 lightPosition(200.0f, 2000.0f, 350.0f);
 
   float near_plane = 1.0f, far_plane = 5000.0f;
   glm::mat4 lightProjection =
@@ -108,8 +108,7 @@ int main() {
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-  glGenerateMipmap(GL_TEXTURE_3D);
-  glBindTexture(GL_TEXTURE_3D, voxelTexture);
+  glBindTexture(GL_TEXTURE_3D, 0);
 
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
   glDisable(GL_DEPTH_TEST);
@@ -137,6 +136,8 @@ int main() {
   glViewport(0, 0, VOXEL_DIM, VOXEL_DIM);
   scene.draw(voxelizeShader, 1);
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+  glActiveTexture(GL_TEXTURE0);
+  glGenerateMipmap(GL_TEXTURE_3D);
   glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -150,13 +151,22 @@ int main() {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   /* VOXELIZATION */
 
-  Shader vis = Shader("shaders/vis.vert", "shaders/vis.frag");
-  vis.use();
-  vis.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
-  vis.setUniform(uniformType::fv3, glm::value_ptr(worldCenter), "worldCenter");
-  vis.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
-  voxelTextureUnit = 0;
-  vis.setUniform(uniformType::i1, &voxelTextureUnit, "voxelTexture");
+  Shader vct = Shader("shaders/vct.vert", "shaders/vct.frag");
+  vct.use();
+  vct.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+  vct.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
+                 "lightPosition");
+  vct.setUniform(uniformType::fv3, glm::value_ptr(worldCenter), "worldCenter");
+  vct.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
+  vct.setUniform(uniformType::mat4x4, glm::value_ptr(lightSpaceMatrix),
+                 "lightSpaceMatrix");
+
+  // Shader vis = Shader("shaders/vis.vert", "shaders/vis.frag");
+  // vis.use();
+  // vis.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+  // vis.setUniform(uniformType::fv3, glm::value_ptr(worldCenter),
+  // "worldCenter"); vis.setUniform(uniformType::f1, &worldSizeHalf,
+  // "worldSizeHalf");
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
@@ -168,25 +178,38 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    vis.use();
+    vct.use();
     glm::mat4 viewT = camera.getViewMatrix();
-    vis.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
+    vct.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
 
     glm::mat4 projectionT = glm::perspective(
         glm::radians(camera.zoom), (GLfloat)SCR_WIDTH / (GLfloat)SCR_HEIGHT,
         0.1f, 5000.0f);
-    vis.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT), "P");
-    vis.setUniform(uniformType::mat4x4, glm::value_ptr(lightSpaceMatrix),
-                   "lightSpaceMatrix");
-    vis.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
-                   "lightPosition");
-    int sh = 1, tx = 0;
-    vis.setUniform(uniformType::i1, &tx, "tex");
-    vis.setUniform(uniformType::i1, &sh, "shadowMap");
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
+    vct.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT), "P");
 
-    scene.draw(vis, false);
+    voxelTextureUnit = 0;
+    vct.setUniform(uniformType::i1, &voxelTextureUnit, "voxelTexture");
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_3D, voxelTexture);
+    shadowMapUnit = 2;
+    vct.setUniform(uniformType::i1, &shadowMapUnit, "shadowMap");
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    scene.draw(vct, 1);
+
+    // vis.use();
+    // glm::mat4 viewT = camera.getViewMatrix();
+    // vis.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
+
+    // glm::mat4 projectionT = glm::perspective(
+    // glm::radians(camera.zoom), (GLfloat)SCR_WIDTH / (GLfloat)SCR_HEIGHT,
+    // 0.1f, 5000.0f);
+    // vis.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT), "P");
+    // voxelTextureUnit = 0;
+    // vis.setUniform(uniformType::i1, &voxelTextureUnit, "voxelTexture");
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_3D, voxelTexture);
+    // scene.draw(vis, 1);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

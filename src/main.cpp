@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "scene.h"
 #include "shader.h"
+#include "shadowmap.h"
 #include "utils.h"
 
 #include <iostream>
@@ -30,57 +31,11 @@ int main() {
   Scene scene = Scene();
   scene.loadObj("assets/crytek-sponza/", "assets/crytek-sponza/sponza.obj");
   setupModelTransformation();
-
-  /* DEPTH MAP */
-  GLuint depthMapFBO;
-  glGenFramebuffers(1, &depthMapFBO);
-
-  const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-
-  GLuint depthMap;
-  glGenTextures(1, &depthMap);
-  glBindTexture(GL_TEXTURE_2D, depthMap);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH,
-               SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                         depthMap, 0);
-  glDrawBuffer(GL_NONE);
-  glReadBuffer(GL_NONE);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
   glm::vec3 lightPosition(200.0f, 2000.0f, 350.0f);
 
-  float near_plane = 1.0f, far_plane = 5000.0f;
-  glm::mat4 lightProjection =
-      glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, near_plane, far_plane);
-
-  Shader depthShader = Shader("shaders/depthMap.vert", "shaders/depthMap.frag");
-  depthShader.use();
-  depthShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
-  glm::mat4 lightView =
-      glm::lookAt(glm::vec3(lightPosition), glm::vec3(0.0f, 0.0f, 0.0f),
-                  glm::vec3(0.0f, 1.0f, 0.0f));
-
-  glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-  depthShader.setUniform(uniformType::mat4x4, glm::value_ptr(lightSpaceMatrix),
-                         "lightSpaceMatrix");
-
-  glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-  glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-  glClear(GL_DEPTH_BUFFER_BIT);
-  scene.draw(depthShader, 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-  // reset viewport
-  glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  /* DEPTH MAP */
+  ShadowMap shadowMap = ShadowMap("shaders/depthMap.vert",
+                                  "shaders/depthMap.frag", lightPosition);
+  shadowMap.generate(scene);
 
   /* VOXELIZATION */
   Shader voxelizeShader =
@@ -127,12 +82,12 @@ int main() {
   voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
                             "lightPosition");
   voxelizeShader.setUniform(uniformType::mat4x4,
-                            glm::value_ptr(lightSpaceMatrix),
+                            glm::value_ptr(shadowMap.getLightSpaceMatrix()),
                             "lightSpaceMatrix");
   int shadowMapUnit = 2;
   voxelizeShader.setUniform(uniformType::i1, &shadowMapUnit, "shadowMap");
   glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, depthMap);
+  glBindTexture(GL_TEXTURE_2D, shadowMap.getDepthMapTexture());
   glViewport(0, 0, VOXEL_DIM, VOXEL_DIM);
   scene.draw(voxelizeShader, 1);
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -158,7 +113,8 @@ int main() {
                  "lightPosition");
   vct.setUniform(uniformType::fv3, glm::value_ptr(worldCenter), "worldCenter");
   vct.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
-  vct.setUniform(uniformType::mat4x4, glm::value_ptr(lightSpaceMatrix),
+  vct.setUniform(uniformType::mat4x4,
+                 glm::value_ptr(shadowMap.getLightSpaceMatrix()),
                  "lightSpaceMatrix");
 
   // Shader vis = Shader("shaders/vis.vert", "shaders/vis.frag");
@@ -194,7 +150,7 @@ int main() {
     shadowMapUnit = 2;
     vct.setUniform(uniformType::i1, &shadowMapUnit, "shadowMap");
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glBindTexture(GL_TEXTURE_2D, shadowMap.getDepthMapTexture());
     scene.draw(vct, 1);
 
     // vis.use();

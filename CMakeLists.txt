@@ -29,6 +29,8 @@ set(SOURCES
     "${PROJECT_SOURCE_DIR}/src/camera.cpp"
     "${PROJECT_SOURCE_DIR}/src/shadowmap.h"
     "${PROJECT_SOURCE_DIR}/src/shadowmap.cpp"
+    "${PROJECT_SOURCE_DIR}/src/voxelmap.h"
+    "${PROJECT_SOURCE_DIR}/src/voxelmap.cpp"
 )
 
 add_executable(${TARGET} ${SOURCES})

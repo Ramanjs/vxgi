@@ -3,7 +3,7 @@ OpenGL engine for rendering scenes with global illumination in real-time using a
 
 ## TODO:
 - [x] Refactor voxelization procedure into a separate class
-- [ ] Shadow map tight bound using AABB
+- [x] Shadow map tight bound using AABB
 - [ ] Additional Textures
 - [ ] Specular Cones
 - [ ] Interactive imgui interface to edit light, material and models

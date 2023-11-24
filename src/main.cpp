@@ -29,8 +29,10 @@ int main() {
   scene.loadObj("assets/crytek-sponza/", "assets/crytek-sponza/sponza.obj");
   glm::vec3 lightPosition(200.0f, 2000.0f, 350.0f);
 
-  ShadowMap shadowMap = ShadowMap("shaders/depthMap.vert",
-                                  "shaders/depthMap.frag", lightPosition);
+  ShadowMap shadowMap =
+      ShadowMap("shaders/depthMap.vert", "shaders/depthMap.frag",
+                "shaders/debugDepthMap.vert", "shaders/debugDepthMap.frag",
+                lightPosition);
   shadowMap.generate(scene);
 
   VoxelMap voxelMap = VoxelMap(

@@ -7,30 +7,33 @@
 
 class ShadowMap {
 private:
-  const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+  const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
   GLuint depthMapFBO;
   GLuint depthMapTexure;
   glm::mat4 lightProjection;
   Shader depthMapShader;
+  Shader depthMapDebugShader;
   glm::vec3 &lightPosition;
   glm::mat4 lightSpaceMatrix;
+  GLfloat AABB[6];
+  GLuint quadVAO;
 
   void initTexture();
-  void initShader();
+  void initShader(Scene &scene);
+  void computeLightSpaceAABB(Scene &scene, glm::mat4 &lightView);
+  void renderQuad();
 
 public:
-  ShadowMap(const char *vsPath, const char *fsPath, glm::vec3 &_lightPosition)
-      : depthMapShader(vsPath, fsPath), lightPosition(_lightPosition) {
-    float near_plane = 1.0f, far_plane = 5000.0f;
-    lightProjection =
-        glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, near_plane, far_plane);
-    ;
-
+  ShadowMap(const char *vsPath, const char *fsPath, const char *debugVsPath,
+            const char *debugFsPath, glm::vec3 &_lightPosition)
+      : depthMapShader(vsPath, fsPath),
+        depthMapDebugShader(debugVsPath, debugFsPath),
+        lightPosition(_lightPosition), quadVAO(0) {
     initTexture();
-    initShader();
   }
 
   void generate(Scene &scene);
+  void render();
   glm::mat4 &getLightSpaceMatrix() { return lightSpaceMatrix; }
   GLuint getDepthMapTexture() { return depthMapTexure; }
 };

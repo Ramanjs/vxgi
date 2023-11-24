@@ -211,3 +211,12 @@ float Scene::getWorldSize() {
   float size = std::max(diag.x, std::max(diag.y, diag.z));
   return size;
 }
+
+std::vector<glm::vec3> Scene::getAABB() {
+  using v = glm::vec3;
+  return {
+      v(gMinX, gMinY, gMinZ), v(gMinX, gMinY, gMaxZ), v(gMinX, gMaxY, gMinZ),
+      v(gMinX, gMaxY, gMaxZ), v(gMaxX, gMinY, gMinZ), v(gMaxX, gMinY, gMaxZ),
+      v(gMaxX, gMaxY, gMinZ), v(gMaxX, gMaxY, gMaxZ),
+  };
+}

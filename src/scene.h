@@ -24,6 +24,7 @@ public:
   void draw(Shader &shader, int textureUnit);
   glm::vec3 getWorldCenter();
   float getWorldSize();
+  std::vector<glm::vec3> getAABB();
 };
 
 #endif /* ifndef SCENE_H */

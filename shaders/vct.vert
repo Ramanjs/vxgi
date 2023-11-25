@@ -14,8 +14,7 @@ uniform mat4 lightSpaceMatrix;
 out vec3 worldPosFrag;
 out vec3 normalFrag;
 out vec2 texCoordFrag;
-out vec3 tangentFrag;
-out vec3 bitangentFrag;
+out mat3 TBN;
 out vec4 lightSpacePosFrag;
 
 void main() {
@@ -23,8 +22,7 @@ void main() {
     normalFrag = transpose(inverse(mat3(M))) * aNorm;
     lightSpacePosFrag = lightSpaceMatrix * vec4(worldPosFrag, 1.0);
     texCoordFrag = aTex;
-    tangentFrag = aTan;
-    bitangentFrag = aBit;
+    TBN = mat3(aTan, aBit, aNorm);
     
     gl_Position = P*V*vec4(worldPosFrag, 1.0);
 }

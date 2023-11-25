@@ -213,37 +213,37 @@ void Scene::draw(Shader &shader, int textureUnit) {
     Material material = materials[mesh.materialId];
     glBindVertexArray(mesh.vao);
 
-    int zero = 0, one = 1;
+    int zero = 0, one = 1, mapUnit = textureUnit;
     shader.setUniform(uniformType::fv3, glm::value_ptr(material.kd), "kd");
     shader.setUniform(uniformType::fv3, glm::value_ptr(material.ks), "ks");
-    shader.setUniform(uniformType::f1, &material.shininess, "shininess");
+    shader.setUniform(uniformType::f1, &(material.shininess), "shininess");
     shader.setUniform(uniformType::i1, &zero, "hasDiffuseMap");
-    // shader.setUniform(uniformType::i1, &zero, "material.hasSpecularMap");
-    // shader.setUniform(uniformType::i1, &zero, "material.hasNormalMap");
+    shader.setUniform(uniformType::i1, &zero, "hasSpecularMap");
+    shader.setUniform(uniformType::i1, &zero, "hasNormalMap");
 
     if (material.diffuseMap > 0) {
       shader.setUniform(uniformType::i1, &one, "hasDiffuseMap");
-      glActiveTexture(GL_TEXTURE0 + textureUnit + 0);
-      glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
-      int mapUnit = textureUnit + 0;
-      shader.setUniform(uniformType::i1, &mapUnit, "diffuseMap");
     }
+    glActiveTexture(GL_TEXTURE0 + textureUnit + 0);
+    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
+    mapUnit = textureUnit + 0;
+    shader.setUniform(uniformType::i1, &mapUnit, "diffuseMap");
 
     if (material.specularMap > 0) {
       shader.setUniform(uniformType::i1, &one, "hasSpecularMap");
-      glActiveTexture(GL_TEXTURE0 + textureUnit + 1);
-      glBindTexture(GL_TEXTURE_2D, material.specularMap);
-      int mapUnit = textureUnit + 1;
-      shader.setUniform(uniformType::i1, &mapUnit, "specularMap");
     }
+    glActiveTexture(GL_TEXTURE0 + textureUnit + 1);
+    glBindTexture(GL_TEXTURE_2D, material.specularMap);
+    mapUnit = textureUnit + 1;
+    shader.setUniform(uniformType::i1, &mapUnit, "specularMap");
 
     if (material.normalMap > 0) {
       shader.setUniform(uniformType::i1, &one, "hasNormalMap");
-      glActiveTexture(GL_TEXTURE0 + textureUnit + 2);
-      glBindTexture(GL_TEXTURE_2D, material.normalMap);
-      int mapUnit = textureUnit + 2;
-      shader.setUniform(uniformType::i1, &mapUnit, "normalMap");
     }
+    glActiveTexture(GL_TEXTURE0 + textureUnit + 2);
+    glBindTexture(GL_TEXTURE_2D, material.normalMap);
+    mapUnit = textureUnit + 2;
+    shader.setUniform(uniformType::i1, &mapUnit, "normalMap");
 
     glDrawArrays(GL_TRIANGLES, 0, 3 * mesh.numTriangles);
 

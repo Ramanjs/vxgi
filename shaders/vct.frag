@@ -6,6 +6,8 @@
 in vec3 worldPosFrag;
 in vec3 normalFrag;
 in vec2 texCoordFrag;
+in vec3 tangentFrag;
+in vec3 bitangentFrag;
 in vec4 lightSpacePosFrag;
 
 uniform vec3 lightPosition;
@@ -130,6 +132,12 @@ void main() {
   }
 
   vec3 normal = normalize(normalFrag);
+	if (hasNormalMap == 1) {
+		mat3 TBN = mat3(tangentFrag, bitangentFrag, normalFrag);
+		normal = texture(normalMap, texCoordFrag).rgb;
+		normal = normal * 2.0 - 1.0;
+		normal = normalize(TBN * normal);
+	}
   vec3 lightColor = vec3(1.0);
 
   // diffuse

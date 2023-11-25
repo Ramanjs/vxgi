@@ -55,7 +55,7 @@ vec3 traceDiffuseCone(const vec3 from, vec3 direction){
     acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
     dist += ll * VOXEL_SIZE * 2;
 	}
-	return pow(acc.rgb * 2.0, vec3(1.5));
+	return pow(acc.rgb * 2.0, vec3(1.0));
 }
 
 vec3 indirectDiffuseLight(vec3 normal){
@@ -103,6 +103,43 @@ vec3 indirectDiffuseLight(vec3 normal){
 	acc += w[2] * traceDiffuseCone(C_ORIGIN, c4);
 
 	return acc;
+}
+
+vec3 traceCone(vec3 from, vec3 direction, float aperture) {
+    float max_dist = 2.0 * worldSizeHalf;
+    vec4 acc       = vec4( 0.0 );
+
+		float VoxelSize = 2.0 * worldSizeHalf / 512.0;
+    float offset = 2.0 * VoxelSize;
+    float dist   = offset + VoxelSize;
+
+    while ( acc.a < 1.0 && dist < max_dist )
+    {
+        vec3 conePosition = from + direction * dist;
+        float diameter    = 2.0 * aperture * dist;
+        float mipLevel    = log2( diameter / VoxelSize );
+
+        vec3 coords = ( conePosition - worldCenter ) / worldSizeHalf;
+        coords      = 0.5 * coords + 0.5;
+
+        vec4 voxel = textureLod( voxelTexture, coords, min(MIPMAP_HARDCAP, mipLevel ));
+        acc += ( 1.0 - acc.a ) * voxel;
+
+        dist += 0.5 * diameter;
+    }
+
+    return acc.rgb;
+}
+
+vec3 indirectSpecularLight(vec3 viewDirection, vec3 N) {
+    float aperture = 0.0374533;
+
+    aperture = clamp( tan( 0.5 * PI * 0.5 ), aperture, 0.5 * PI );
+
+		const vec3 reflection = normalize(reflect(-viewDirection, N));
+    vec3 specular = traceCone( worldPosFrag, reflection, aperture );
+
+    return specular;
 }
 
 float shadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
@@ -157,8 +194,10 @@ void main() {
   float shadow = shadowCalculation(lightSpacePosFrag, lightDir, normal);
   vec3 lighting = (1.0 - shadow) * (diffuse + specular) * color;
 
-  vec3 diffusegi = color * indirectDiffuseLight(normal);
-	lighting += color * diffusegi;
+  vec3 diffuseGI = color * indirectDiffuseLight(normal);
+	lighting += color * diffuseGI;
+	vec3 specularGI = indirectSpecularLight(viewDir, normal);
+	lighting += (spec * specReflectivity) * specularGI;
 
   outColor = vec4(lighting, 1.0);
 }

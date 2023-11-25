@@ -145,7 +145,7 @@ newmtl column_a
 	bump textures/sponza_column_a_ddn.tga
 
 newmtl floor
-	Ns 60.0000
+	Ns 10.0000
 	Ni 1.5000
 	d 1.0000
 	Tr 0.0000
@@ -157,7 +157,6 @@ newmtl floor
 	Ke 0.0000 0.0000 0.0000
 	map_Ka textures/sponza_floor_a_diff.tga
 	map_Kd textures/sponza_floor_a_diff.tga
-	map_Ks textures/sponza_floor_a_spec.tga
 
 newmtl column_c
 	Ns 10.0000

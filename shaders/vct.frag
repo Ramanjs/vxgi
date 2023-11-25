@@ -54,7 +54,6 @@ vec3 traceDiffuseCone(const vec3 from, vec3 direction){
     acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
     dist += ll * VOXEL_SIZE * 2;
 	}
-	//return acc.rgb;
 	return pow(acc.rgb * 2.0, vec3(1.5));
 }
 
@@ -125,9 +124,9 @@ float shadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
 }
 
 void main() {
-  vec3 color = kd;
-  if (hasDiffuseMap == 1) {
-    color = texture(diffuseMap, texCoordFrag).rgb;
+  vec3 color = texture(diffuseMap, texCoordFrag).rgb;
+  if (hasDiffuseMap == 0) {
+    color = kd;
   }
 
   vec3 normal = normalize(normalFrag);
@@ -138,12 +137,22 @@ void main() {
   float diff = max(dot(lightDir, normal), 0.0);
   vec3 diffuse = diff * lightColor;
 
+	// specular
+  vec3 viewDir = normalize(camPosition - worldPosFrag);
+  vec3 reflectDir = reflect(-lightDir, normal);
+  float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+  vec3 specReflectivity = texture(specularMap, texCoordFrag).rgb;
+	if (hasSpecularMap == 0) {
+		specReflectivity = ks;
+	}
+  vec3 specular = (spec * specReflectivity) * lightColor;
+
   // calculate shadow
   float shadow = shadowCalculation(lightSpacePosFrag, lightDir, normal);
-  vec3 lighting = (1.0 - shadow) * diffuse * color;
+  vec3 lighting = (1.0 - shadow) * (diffuse + specular) * color;
 
   vec3 diffusegi = color * indirectDiffuseLight(normal);
-	lighting += diffusegi;
+	lighting += color * diffusegi;
 
   outColor = vec4(lighting, 1.0);
 }

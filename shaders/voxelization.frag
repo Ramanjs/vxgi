@@ -17,11 +17,7 @@ uniform vec3 kd;
 uniform vec3 ks;
 uniform float shininess;
 uniform int hasDiffuseMap;
-uniform int hasSpecularMap;
-uniform int hasNormalMap;
 uniform sampler2D diffuseMap;
-uniform sampler2D specularMap;
-uniform sampler2D normalMap;
 /* Material */
  
 float shadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
@@ -44,9 +40,9 @@ float shadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
 }
 
 void main() {
-    vec3 color = kd;
-    if (hasDiffuseMap == 1) {
-        color = texture(diffuseMap, texCoordFrag).rgb;
+    vec3 color = texture(diffuseMap, texCoordFrag).rgb;
+    if (hasDiffuseMap == 0) {
+        color = kd;
     }
 
     vec3 normal = normalize(normalFrag);

@@ -40,7 +40,7 @@ void VoxelMap::voxelize(glm::vec3 lightPosition) {
 
   voxelizeShader.use();
   glBindImageTexture(0, voxelTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
-  renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+  voxelizeShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
   voxelizeShader.setUniform(uniformType::i1, &voxelTextureUnit, "voxelTexture");
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_3D, voxelTexture);

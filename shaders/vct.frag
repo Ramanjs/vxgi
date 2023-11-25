@@ -8,14 +8,21 @@ in vec3 normalFrag;
 in vec2 texCoordFrag;
 in vec4 lightSpacePosFrag;
 
+struct Material {
+	vec3 kd;
+	vec3 ks;
+	float shininess;
+};
+
 uniform vec3 lightPosition;
 uniform vec3 camPosition;
 uniform vec3 worldCenter;
 uniform float worldSizeHalf;
 
 uniform sampler3D voxelTexture;
-uniform sampler2D tex;
 uniform sampler2D shadowMap;
+uniform sampler2D diffuseMap;
+uniform Material material;
 
 out vec4 outColor;
 
@@ -43,6 +50,7 @@ vec3 traceDiffuseCone(const vec3 from, vec3 direction){
     acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
     dist += ll * VOXEL_SIZE * 2;
 	}
+	//return acc.rgb;
 	return pow(acc.rgb * 2.0, vec3(1.5));
 }
 
@@ -113,7 +121,8 @@ float shadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
 }
 
 void main() {
-  vec3 color = texture(tex, texCoordFrag).rgb;
+  vec3 color = texture(diffuseMap, texCoordFrag).rgb;
+
   vec3 normal = normalize(normalFrag);
   vec3 lightColor = vec3(1.0);
 
@@ -127,7 +136,7 @@ void main() {
   vec3 lighting = (1.0 - shadow) * diffuse * color;
 
   vec3 diffusegi = color * indirectDiffuseLight(normal);
-  lighting += color * diffusegi;
+	lighting += diffusegi;
 
   outColor = vec4(lighting, 1.0);
 }

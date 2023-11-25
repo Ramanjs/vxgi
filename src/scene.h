@@ -1,6 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include "material.h"
 #include "mesh.h"
 #include "shader.h"
 #include "tinyobjloader.h"
@@ -13,8 +14,10 @@ class Scene {
 private:
   std::vector<Mesh> meshes;
   std::map<std::string, GLuint> textures;
-  std::vector<tinyobj::material_t> materials;
+  std::vector<Material> materials;
   float gMinX, gMinY, gMinZ, gMaxX, gMaxY, gMaxZ;
+
+  void loadTextureFromFile(const char *texturePath, const char *textureName);
 
 public:
   Scene()

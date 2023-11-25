@@ -16,6 +16,7 @@ class Shader {
 private:
   GLuint vs, fs, gs;
   GLuint program;
+  std::string vsName, fsName;
 
 public:
   Shader(const char *vsPath, const char *fsPath, const char *gsPath = 0);

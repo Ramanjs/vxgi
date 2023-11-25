@@ -78,7 +78,11 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
   glm::mat4 modelT = glm::mat4(1.0f);
   glm::vec3 worldCenter = scene.getWorldCenter();
   GLfloat worldSizeHalf = scene.getWorldSize() / 2.0;
-
+  glm::vec3 camPosition = camera.position;
+  glm::mat4 viewT = camera.getViewMatrix();
+  glm::mat4 projectionT =
+      glm::perspective(glm::radians(camera.zoom),
+                       (GLfloat)SCR_WIDTH / (GLfloat)SCR_HEIGHT, 0.1f, 5000.0f);
   renderShader.use();
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
   renderShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
@@ -89,12 +93,9 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
   renderShader.setUniform(uniformType::mat4x4,
                           glm::value_ptr(shadowMap.getLightSpaceMatrix()),
                           "lightSpaceMatrix");
-  glm::mat4 viewT = camera.getViewMatrix();
+  renderShader.setUniform(uniformType::fv3, glm::value_ptr(camPosition),
+                          "camPosition");
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
-
-  glm::mat4 projectionT =
-      glm::perspective(glm::radians(camera.zoom),
-                       (GLfloat)SCR_WIDTH / (GLfloat)SCR_HEIGHT, 0.1f, 5000.0f);
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT),
                           "P");
 

@@ -18,6 +18,12 @@ private:
   float gMinX, gMinY, gMinZ, gMaxX, gMaxY, gMaxZ;
 
   void loadTextureFromFile(const char *texturePath, const char *textureName);
+  void computeTangentAndBitangent(GLfloat pos1x, GLfloat pos1y, GLfloat pos1z,
+                                  GLfloat pos2x, GLfloat pos2y, GLfloat pos2z,
+                                  GLfloat pos3x, GLfloat pos3y, GLfloat pos3z,
+                                  GLfloat uv1x, GLfloat uv1y, GLfloat uv2x,
+                                  GLfloat uv2y, GLfloat uv3x, GLfloat uv3y,
+                                  glm::vec3 &tangent, glm::vec3 &bitangent);
 
 public:
   Scene()

@@ -152,6 +152,15 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
         tc[2][1] = 0.0f;
       }
 
+      glm::vec3 tangent;
+      glm::vec3 bitangent;
+      if (material.normalMap > 0) {
+        computeTangentAndBitangent(v[0][0], v[0][1], v[0][2], v[1][0], v[1][1],
+                                   v[1][2], v[2][0], v[2][1], v[2][2], tc[0][0],
+                                   tc[0][1], tc[1][0], tc[1][1], tc[2][0],
+                                   tc[2][1], tangent, bitangent);
+      }
+
       for (int k = 0; k < 3; k++) {
         buffer.push_back(v[k][0]);
         buffer.push_back(v[k][1]);
@@ -161,6 +170,15 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
         buffer.push_back(n[k][2]);
         buffer.push_back(tc[k][0]);
         buffer.push_back(tc[k][1]);
+
+        if (material.normalMap > 0) {
+          buffer.push_back(tangent.x);
+          buffer.push_back(tangent.y);
+          buffer.push_back(tangent.z);
+          buffer.push_back(bitangent.x);
+          buffer.push_back(bitangent.y);
+          buffer.push_back(bitangent.z);
+        }
 
         gMinX = std::min(gMinX, v[k][0]);
         gMinY = std::min(gMinY, v[k][1]);
@@ -176,6 +194,9 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
     mesh.vbo = 0;
     mesh.materialId = shapes[s].mesh.material_ids[0];
     GLuint stride = 8;
+    if (material.normalMap > 0) {
+      stride += 6;
+    }
 
     glGenVertexArrays(1, &mesh.vao);
     glGenBuffers(1, &mesh.vbo);
@@ -195,6 +216,16 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat),
                           (void *)(6 * sizeof(GLfloat)));
+
+    if (material.normalMap > 0) {
+      glEnableVertexAttribArray(3);
+      glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat),
+                            (void *)(8 * sizeof(GLfloat)));
+
+      glEnableVertexAttribArray(4);
+      glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat),
+                            (void *)(11 * sizeof(GLfloat)));
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -247,6 +278,13 @@ void Scene::draw(Shader &shader, int textureUnit) {
 
     glDrawArrays(GL_TRIANGLES, 0, 3 * mesh.numTriangles);
 
+    glActiveTexture(GL_TEXTURE0 + textureUnit + 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0 + textureUnit + 1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0 + textureUnit + 2);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     glBindVertexArray(0);
   }
 }
@@ -275,4 +313,30 @@ std::vector<glm::vec3> Scene::getAABB() {
       v(gMinX, gMaxY, gMaxZ), v(gMaxX, gMinY, gMinZ), v(gMaxX, gMinY, gMaxZ),
       v(gMaxX, gMaxY, gMinZ), v(gMaxX, gMaxY, gMaxZ),
   };
+}
+
+void Scene::computeTangentAndBitangent(
+    GLfloat pos1x, GLfloat pos1y, GLfloat pos1z, GLfloat pos2x, GLfloat pos2y,
+    GLfloat pos2z, GLfloat pos3x, GLfloat pos3y, GLfloat pos3z, GLfloat uv1x,
+    GLfloat uv1y, GLfloat uv2x, GLfloat uv2y, GLfloat uv3x, GLfloat uv3y,
+    glm::vec3 &tangent, glm::vec3 &bitangent) {
+  // Create vectors for the edges of the triangle in both position and UV space
+  glm::vec3 edge1(pos2x - pos1x, pos2y - pos1y, pos2z - pos1z);
+  glm::vec3 edge2(pos3x - pos2x, pos3y - pos2y, pos3z - pos2z);
+
+  glm::vec2 deltaUV1(uv2x - uv1x, uv2y - uv1y);
+  glm::vec2 deltaUV2(uv3x - uv2x, uv3y - uv2y);
+
+  // Compute the tangent and bitangent
+  float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+  tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+  tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+  tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+  tangent = glm::normalize(tangent);
+
+  bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+  bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+  bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+  bitangent = glm::normalize(bitangent);
 }

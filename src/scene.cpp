@@ -214,46 +214,38 @@ void Scene::draw(Shader &shader, int textureUnit) {
     glBindVertexArray(mesh.vao);
 
     int zero = 0, one = 1;
-    shader.setUniform(uniformType::fv3, glm::value_ptr(material.kd),
-                      "material.kd");
-    shader.setUniform(uniformType::fv3, glm::value_ptr(material.ks),
-                      "material.ks");
-    shader.setUniform(uniformType::f1, &material.shininess,
-                      "material.shininess");
-    // shader.setUniform(uniformType::i1, &zero, "material.hasDiffuseMap");
+    shader.setUniform(uniformType::fv3, glm::value_ptr(material.kd), "kd");
+    shader.setUniform(uniformType::fv3, glm::value_ptr(material.ks), "ks");
+    shader.setUniform(uniformType::f1, &material.shininess, "shininess");
+    shader.setUniform(uniformType::i1, &zero, "hasDiffuseMap");
     // shader.setUniform(uniformType::i1, &zero, "material.hasSpecularMap");
     // shader.setUniform(uniformType::i1, &zero, "material.hasNormalMap");
 
-    // if (material.diffuseMap > 0) {
-    glActiveTexture(GL_TEXTURE0 + textureUnit + 0);
-    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
-    shader.setUniform(uniformType::i1, &textureUnit + 0, "diffuseMap");
-    //}
+    if (material.diffuseMap > 0) {
+      shader.setUniform(uniformType::i1, &one, "hasDiffuseMap");
+      glActiveTexture(GL_TEXTURE0 + textureUnit + 0);
+      glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
+      int mapUnit = textureUnit + 0;
+      shader.setUniform(uniformType::i1, &mapUnit, "diffuseMap");
+    }
 
-    // if (material.specularMap > 0) {
-    // shader.setUniform(uniformType::i1, &one, "material.hasSpecularMap");
-    // glActiveTexture(GL_TEXTURE0 + textureUnit + 1);
-    // glBindTexture(GL_TEXTURE_2D, material.specularMap);
-    // shader.setUniform(uniformType::i1, &textureUnit + 1,
-    //"material.specularMap");
-    //}
+    if (material.specularMap > 0) {
+      shader.setUniform(uniformType::i1, &one, "hasSpecularMap");
+      glActiveTexture(GL_TEXTURE0 + textureUnit + 1);
+      glBindTexture(GL_TEXTURE_2D, material.specularMap);
+      int mapUnit = textureUnit + 1;
+      shader.setUniform(uniformType::i1, &mapUnit, "specularMap");
+    }
 
-    // if (material.normalMap > 0) {
-    // shader.setUniform(uniformType::i1, &one, "material.hasNormalMap");
-    // glActiveTexture(GL_TEXTURE0 + textureUnit + 2);
-    // glBindTexture(GL_TEXTURE_2D, material.normalMap);
-    // shader.setUniform(uniformType::i1, &textureUnit + 2,
-    //"material.normalMap");
-    //}
+    if (material.normalMap > 0) {
+      shader.setUniform(uniformType::i1, &one, "hasNormalMap");
+      glActiveTexture(GL_TEXTURE0 + textureUnit + 2);
+      glBindTexture(GL_TEXTURE_2D, material.normalMap);
+      int mapUnit = textureUnit + 2;
+      shader.setUniform(uniformType::i1, &mapUnit, "normalMap");
+    }
 
     glDrawArrays(GL_TRIANGLES, 0, 3 * mesh.numTriangles);
-
-    // glActiveTexture(GL_TEXTURE0 + textureUnit + 0);
-    // glBindTexture(GL_TEXTURE_2D, 0);
-    // glActiveTexture(GL_TEXTURE0 + textureUnit + 1);
-    // glBindTexture(GL_TEXTURE_2D, 0);
-    // glActiveTexture(GL_TEXTURE0 + textureUnit + 2);
-    // glBindTexture(GL_TEXTURE_2D, 0);
 
     glBindVertexArray(0);
   }

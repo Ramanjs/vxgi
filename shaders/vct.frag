@@ -8,12 +8,6 @@ in vec3 normalFrag;
 in vec2 texCoordFrag;
 in vec4 lightSpacePosFrag;
 
-struct Material {
-	vec3 kd;
-	vec3 ks;
-	float shininess;
-};
-
 uniform vec3 lightPosition;
 uniform vec3 camPosition;
 uniform vec3 worldCenter;
@@ -21,8 +15,18 @@ uniform float worldSizeHalf;
 
 uniform sampler3D voxelTexture;
 uniform sampler2D shadowMap;
+
+/* Material */
+uniform vec3 kd;
+uniform vec3 ks;
+uniform float shininess;
+uniform int hasDiffuseMap;
+uniform int hasSpecularMap;
+uniform int hasNormalMap;
 uniform sampler2D diffuseMap;
-uniform Material material;
+uniform sampler2D specularMap;
+uniform sampler2D normalMap;
+/* Material */
 
 out vec4 outColor;
 
@@ -121,7 +125,10 @@ float shadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
 }
 
 void main() {
-  vec3 color = texture(diffuseMap, texCoordFrag).rgb;
+  vec3 color = kd;
+  if (hasDiffuseMap == 1) {
+    color = texture(diffuseMap, texCoordFrag).rgb;
+  }
 
   vec3 normal = normalize(normalFrag);
   vec3 lightColor = vec3(1.0);

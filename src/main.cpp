@@ -27,7 +27,7 @@ int main() {
 
   Scene scene = Scene();
   scene.loadObj("assets/crytek-sponza/", "assets/crytek-sponza/sponza.obj");
-  glm::vec3 lightPosition(200.0f, 2000.0f, 350.0f);
+  glm::vec3 lightPosition(200.0f, 2000.0f, 450.0f);
 
   ShadowMap shadowMap =
       ShadowMap("shaders/depthMap.vert", "shaders/depthMap.frag",

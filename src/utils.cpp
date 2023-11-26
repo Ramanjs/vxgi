@@ -69,5 +69,10 @@ GLFWwindow *setupWindow(int width, int height) {
   }
   std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
+  if (GLEW_NV_conservative_raster) {
+    glEnable(0x9346);
+    std::cout << "Hardware conservative rasterization enabled" << std::endl;
+  }
+
   return window;
 }

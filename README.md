@@ -13,3 +13,16 @@ OpenGL engine for rendering scenes with global illumination in real-time using a
 - [ ] Emissive materials
 - [ ] Possibly use assimp for a PBR based pipeline
 - [ ] Sparse voxel octree
+
+## ImGui Editor Options
+
+- [ ] Move point light source around
+- [ ] Toggle between viewing modes:
+    - [ ] Visualization
+        - [ ] Shadows ??
+    - [ ] GI
+        - [ ] Indirect Diffuse
+        - [ ] Indirect Specular
+- [ ] Change material properties
+- [ ] Move objects around
+- [ ] Change voxel map resolution

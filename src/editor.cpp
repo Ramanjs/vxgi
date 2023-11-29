@@ -47,9 +47,13 @@ void Editor::renderEditor() {
                        2000.0f);
     ImGui::SliderFloat("z", glm::value_ptr(lightPosition) + 2, -500.0f, 500.0f);
     if (ImGui::IsItemEdited()) {
+      regenShadowMap = true;
       revoxelize = true;
     }
     ImGui::ColorEdit3("Color", glm::value_ptr(lightColor));
+    if (ImGui::IsItemEdited()) {
+      revoxelize = true;
+    }
   }
 
   if (ImGui::CollapsingHeader("Engine")) {
@@ -107,12 +111,15 @@ void Editor::renderEditor() {
 }
 
 void Editor::renderScene() {
-  if (revoxelize) {
+  if (regenShadowMap) {
     shadowMap.generate(scene, lightPosition);
-    voxelmap.voxelize(lightPosition);
+    regenShadowMap = false;
+  }
+  if (revoxelize) {
+    voxelmap.voxelize(lightPosition, lightColor);
     revoxelize = false;
   }
-  voxelmap.render(camera, lightPosition);
+  voxelmap.render(camera, lightPosition, lightColor);
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

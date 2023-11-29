@@ -21,6 +21,7 @@ private:
   int voxelRes;
   bool viewMode;
   bool revoxelize;
+  bool regenShadowMap;
   bool visualize;
   bool shadows;
   bool diffuseGI;
@@ -41,8 +42,9 @@ public:
       : engineMode(EngineMode::RENDER), shadowMap(_shadowMap), scene(_scene),
         voxelmap(_voxelmap), camera(_camera) {
     lightPosition = glm::vec3(200.0f, 2000.0f, 450.0f);
+    lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     viewMode = true, voxelRes = 0, shadows = true, diffuseGI = true,
-    specularGI = true, revoxelize = true;
+    specularGI = true, revoxelize = true, regenShadowMap = true;
   }
 
   void processCameraInput(GLFWwindow *window);

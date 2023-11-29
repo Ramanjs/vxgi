@@ -35,9 +35,9 @@ public:
   void initVisualizationShader(const char *vsPath, const char *fsPath);
   void initRenderShader(const char *vsPath, const char *fsPath);
 
-  void voxelize(glm::vec3 lightPosition);
+  void voxelize(glm::vec3 lightPosition, glm::vec3 lightColor);
   void visualize(Camera &camera);
-  void render(Camera &camera, glm::vec3 lightPosition);
+  void render(Camera &camera, glm::vec3 lightPosition, glm::vec3 lightColor);
 
 private:
   void initTexture();

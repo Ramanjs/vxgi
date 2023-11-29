@@ -25,7 +25,7 @@ void VoxelMap::clear() {
   glClearTexImage(voxelTexture, 0, GL_RGBA, GL_UNSIGNED_BYTE, &clearColor);
 }
 
-void VoxelMap::voxelize(glm::vec3 lightPosition) {
+void VoxelMap::voxelize(glm::vec3 lightPosition, glm::vec3 lightColor) {
   clear();
 
   glm::mat4 modelT = glm::mat4(1.0f);
@@ -50,6 +50,8 @@ void VoxelMap::voxelize(glm::vec3 lightPosition) {
   voxelizeShader.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
   voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
                             "lightPosition");
+  voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(lightColor),
+                            "lightColor");
   voxelizeShader.setUniform(uniformType::mat4x4,
                             glm::value_ptr(shadowMap.getLightSpaceMatrix()),
                             "lightSpaceMatrix");
@@ -74,7 +76,8 @@ void VoxelMap::voxelize(glm::vec3 lightPosition) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
+void VoxelMap::render(Camera &camera, glm::vec3 lightPosition,
+                      glm::vec3 lightColor) {
   glm::mat4 modelT = glm::mat4(1.0f);
   glm::vec3 worldCenter = scene.getWorldCenter();
   GLfloat worldSizeHalf = scene.getWorldSize() / 2.0;
@@ -87,6 +90,8 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
   renderShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
                           "lightPosition");
+  renderShader.setUniform(uniformType::fv3, glm::value_ptr(lightColor),
+                          "lightColor");
   renderShader.setUniform(uniformType::fv3, glm::value_ptr(worldCenter),
                           "worldCenter");
   renderShader.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");

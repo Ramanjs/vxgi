@@ -45,10 +45,15 @@ int main() {
   glfwSetScrollCallback(window, scrollCallback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+  long long nFrames = 0;
+  long double totalTime = 0;
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
+
+    totalTime += deltaTime;
+    nFrames++;
 
     processInput(window);
 
@@ -60,6 +65,9 @@ int main() {
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
+
+  std::cout << "avg deltaTime = " << totalTime / nFrames << " over " << nFrames << " frames." << std::endl;
+  std::cout << "avg FPS: " << 1 / (totalTime / nFrames) << std::endl;
 
   glfwTerminate();
   return 0;

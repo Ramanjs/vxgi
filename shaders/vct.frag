@@ -10,6 +10,7 @@ in mat3 TBN;
 in vec4 lightSpacePosFrag;
 
 uniform vec3 lightPosition;
+uniform vec3 lightColor;
 uniform vec3 camPosition;
 uniform vec3 worldCenter;
 uniform float worldSizeHalf;
@@ -173,7 +174,6 @@ void main() {
 		normal = normal * 2.0 - 1.0;
 		normal = normalize(TBN * normal);
 	}
-  vec3 lightColor = vec3(1.0);
 
   // diffuse
   vec3 lightDir = normalize(lightPosition - worldPosFrag);

@@ -6,6 +6,7 @@ in vec2 texCoordFrag;
 in vec4 lightSpacePosFrag;
 
 uniform vec3 lightPosition;
+uniform vec3 lightColor;
 uniform vec3 worldCenter;
 uniform float worldSizeHalf;
 
@@ -46,7 +47,6 @@ void main() {
     }
 
     vec3 normal = normalize(normalFrag);
-    vec3 lightColor = vec3(1.0);
 
     // diffuse
     vec3 lightDir = normalize(lightPosition - worldPositionFrag);

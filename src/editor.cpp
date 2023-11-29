@@ -40,12 +40,69 @@ void Editor::renderEditor() {
   ImGui::SetNextWindowSize(ImVec2(EDITOR_WIDTH, EDITOR_HEIGHT));
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::Begin("VXGI Editor");
-  ImGui::Text("Point Light");
-  ImGui::SliderFloat3("Position", glm::value_ptr(lightPosition), -100.0f,
-                      2000.0f);
-  if (ImGui::IsItemEdited()) {
-    revoxelize = true;
+  if (ImGui::CollapsingHeader("Point Light")) {
+    ImGui::Text("Position");
+    ImGui::SliderFloat("x", glm::value_ptr(lightPosition), -500.0f, 500.0f);
+    ImGui::SliderFloat("y", glm::value_ptr(lightPosition) + 1, 1200.0f,
+                       2000.0f);
+    ImGui::SliderFloat("z", glm::value_ptr(lightPosition) + 2, -500.0f, 500.0f);
+    if (ImGui::IsItemEdited()) {
+      revoxelize = true;
+    }
+    ImGui::ColorEdit3("Color", glm::value_ptr(lightColor));
   }
+
+  if (ImGui::CollapsingHeader("Engine")) {
+    ImGui::Text("Rendering Mode");
+    if (ImGui::RadioButton("Visualize", engineMode == EngineMode::VISUALIZE)) {
+      engineMode = EngineMode::VISUALIZE;
+    }
+    if (ImGui::RadioButton("GI", engineMode == EngineMode::RENDER)) {
+      engineMode = EngineMode::RENDER;
+    }
+    if (engineMode == EngineMode::VISUALIZE) {
+      ImGui::Separator();
+      ImGui::Checkbox("Shadows", &shadows);
+    } else {
+      ImGui::Separator();
+      ImGui::Checkbox("Indirect diffuse", &diffuseGI);
+      ImGui::Checkbox("Indirect specular", &specularGI);
+    }
+
+    ImGui::Separator();
+    ImGui::Text("Voxel Map Resolution");
+    const char resolutionLabels[100] = "x512\0x256\0x128\0x64";
+    ImGui::Combo("", &voxelRes, resolutionLabels);
+
+    ImGui::Separator();
+    ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                ImGui::GetIO().Framerate);
+  }
+
+  if (ImGui::CollapsingHeader("Models")) {
+    if (ImGui::TreeNode("Floor")) {
+      ImGui::SliderFloat("Specular", &floorSpecular, 0.0f, 1.0f);
+      ImGui::SliderFloat("Emissive", &floorEmissive, 0.0f, 1.0f);
+      ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Curtain")) {
+      ImGui::SliderFloat("Specular", &curtainSpecular, 0.0f, 1.0f);
+      ImGui::SliderFloat("Emissive", &curtainEmissive, 0.0f, 1.0f);
+      ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Dragon")) {
+      ImGui::Text("Position");
+      ImGui::SliderFloat("x", glm::value_ptr(dragonPosition), -200.0f, 200.0f);
+      ImGui::SliderFloat("y", glm::value_ptr(dragonPosition) + 1, -200.0f,
+                         200.0f);
+      ImGui::SliderFloat("z", glm::value_ptr(dragonPosition) + 2, -200.0f,
+                         200.0f);
+      ImGui::SliderFloat("Specular", &dragonSpecular, 0.0f, 1.0f);
+      ImGui::SliderFloat("Emissive", &dragonEmissive, 0.0f, 1.0f);
+      ImGui::TreePop();
+    }
+  }
+
   ImGui::End();
 }
 

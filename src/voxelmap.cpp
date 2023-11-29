@@ -80,9 +80,9 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
   GLfloat worldSizeHalf = scene.getWorldSize() / 2.0;
   glm::vec3 camPosition = camera.position;
   glm::mat4 viewT = camera.getViewMatrix();
-  glm::mat4 projectionT =
-      glm::perspective(glm::radians(camera.zoom),
-                       (GLfloat)SCR_WIDTH / (GLfloat)SCR_HEIGHT, 0.1f, 5000.0f);
+  glm::mat4 projectionT = glm::perspective(
+      glm::radians(camera.zoom),
+      (GLfloat)VIEWPORT_WIDTH / (GLfloat)VIEWPORT_HEIGHT, 0.1f, 5000.0f);
   renderShader.use();
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
   renderShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
@@ -107,7 +107,10 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
   renderShader.setUniform(uniformType::i1, &shadowMapUnit, "shadowMap");
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, shadowMap.getDepthMapTexture());
+  glViewport(EDITOR_WIDTH, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   scene.draw(renderShader, 2);
+  // reset viewport
+  glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }
 
 void VoxelMap::visualize(Camera &camera) {

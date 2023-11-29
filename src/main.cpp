@@ -1,5 +1,6 @@
 #include "camera.h"
 #include "constants.h"
+#include "editor.h"
 #include "scene.h"
 #include "shader.h"
 #include "shadowmap.h"
@@ -31,19 +32,17 @@ int main() {
 
   ShadowMap shadowMap =
       ShadowMap("shaders/depthMap.vert", "shaders/depthMap.frag",
-                "shaders/debugDepthMap.vert", "shaders/debugDepthMap.frag",
-                lightPosition);
-  shadowMap.generate(scene);
+                "shaders/debugDepthMap.vert", "shaders/debugDepthMap.frag");
 
   VoxelMap voxelMap = VoxelMap(
       "shaders/voxelization.vert", "shaders/voxelization.frag",
       "shaders/voxelization.geom", "shaders/vis.vert", "shaders/vis.frag",
       "shaders/vct.vert", "shaders/vct.frag", scene, shadowMap);
-  voxelMap.voxelize(lightPosition);
 
   glfwSetCursorPosCallback(window, mouseCallback);
   glfwSetScrollCallback(window, scrollCallback);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+  Editor editor = Editor(scene, shadowMap, voxelMap, camera);
 
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
@@ -55,7 +54,8 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    voxelMap.render(camera, lightPosition);
+    editor.renderEditor();
+    editor.renderScene();
 
     glfwSwapBuffers(window);
     glfwPollEvents();

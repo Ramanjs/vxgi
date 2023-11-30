@@ -20,6 +20,7 @@ uniform sampler2D shadowMap;
 /* Material */
 uniform vec3 kd;
 uniform vec3 ks;
+uniform vec3 ke;
 uniform float shininess;
 uniform int hasDiffuseMap;
 uniform int hasSpecularMap;
@@ -198,6 +199,7 @@ void main() {
   // calculate shadow
   float shadow = shadowCalculation(lightSpacePosFrag, lightDir, normal);
   vec3 lighting = (1.0 - shadow) * (diffuse) * color;
+	lighting += ke * color;
 
 	if (hasDiffuseGI) {
 		vec3 diffuseGI = color * indirectDiffuseLight(normal);

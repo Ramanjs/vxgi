@@ -16,6 +16,7 @@ uniform sampler2D shadowMap;
 /* Material */
 uniform int hasShadows;
 uniform vec3 kd;
+uniform vec3 ke;
 uniform int hasDiffuseMap;
 uniform sampler2D diffuseMap;
 /* Material */
@@ -59,6 +60,8 @@ void main() {
     if (hasShadows == 0) {
         lighting = color;
     }
+
+    lighting += ke * color;
 
     vec3 voxel = (worldPositionFrag - worldCenter) / worldSizeHalf; // [-1, 1]
     voxel = 0.5 * voxel + vec3(0.5); // [0, 1]

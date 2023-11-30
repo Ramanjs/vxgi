@@ -100,6 +100,13 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
     material.ks = glm::vec3(mp->specular[0], mp->specular[1], mp->specular[2]);
     material.shininess = mp->shininess;
 
+    if (mp->name == "floor") {
+      floorIdx = m;
+    }
+    if (mp->name == "fabric_g") {
+      curtainIdx = m;
+    }
+
     materials.push_back(material);
   }
 

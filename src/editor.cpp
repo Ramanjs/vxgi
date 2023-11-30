@@ -63,10 +63,15 @@ void Editor::renderEditor() {
     }
     if (ImGui::RadioButton("GI", engineMode == EngineMode::RENDER)) {
       engineMode = EngineMode::RENDER;
+      hasShadows = true;
+      revoxelize = true;
     }
     if (engineMode == EngineMode::VISUALIZE) {
       ImGui::Separator();
-      ImGui::Checkbox("Shadows", &shadows);
+      ImGui::Checkbox("Shadows", &hasShadows);
+      if (ImGui::IsItemEdited()) {
+        revoxelize = true;
+      }
     } else {
       ImGui::Separator();
       ImGui::Checkbox("Indirect diffuse", &diffuseGI);
@@ -116,10 +121,14 @@ void Editor::renderScene() {
     regenShadowMap = false;
   }
   if (revoxelize) {
-    voxelmap.voxelize(lightPosition, lightColor);
+    voxelmap.voxelize(lightPosition, lightColor, hasShadows);
     revoxelize = false;
   }
-  voxelmap.render(camera, lightPosition, lightColor);
+  if (engineMode == EngineMode::VISUALIZE) {
+     voxelmap.visualize(camera);
+  } else if (engineMode == EngineMode::RENDER) {
+    voxelmap.render(camera, lightPosition, lightColor);
+  }
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

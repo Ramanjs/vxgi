@@ -14,9 +14,8 @@ layout(RGBA8) uniform image3D voxelTexture;
 uniform sampler2D shadowMap;
 
 /* Material */
+uniform int hasShadows;
 uniform vec3 kd;
-uniform vec3 ks;
-uniform float shininess;
 uniform int hasDiffuseMap;
 uniform sampler2D diffuseMap;
 /* Material */
@@ -56,6 +55,10 @@ void main() {
     // calculate shadow
     float shadow = shadowCalculation(lightSpacePosFrag, lightDir, normal);
     vec3 lighting = (1.0 - shadow) * diffuse * color;
+
+    if (hasShadows == 0) {
+        lighting = color;
+    }
 
     vec3 voxel = (worldPositionFrag - worldCenter) / worldSizeHalf; // [-1, 1]
     voxel = 0.5 * voxel + vec3(0.5); // [0, 1]

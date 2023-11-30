@@ -125,9 +125,9 @@ void Editor::renderScene() {
     revoxelize = false;
   }
   if (engineMode == EngineMode::VISUALIZE) {
-     voxelmap.visualize(camera);
+    voxelmap.visualize(camera);
   } else if (engineMode == EngineMode::RENDER) {
-    voxelmap.render(camera, lightPosition, lightColor);
+    voxelmap.render(camera, lightPosition, lightColor, diffuseGI, specularGI);
   }
 
   ImGui::Render();

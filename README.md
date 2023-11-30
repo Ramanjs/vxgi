@@ -5,14 +5,15 @@ OpenGL engine for rendering scenes with global illumination in real-time using a
 - [x] Refactor voxelization procedure into a separate class
 - [x] Shadow map tight bound using AABB
 - [x] Additional Textures
-- [x] Specular Cones (kinda)
+- [x] Specular Cones
 - [x] Interactive imgui interface to edit light, material and models
 - [ ] Take atomic max of a colour for each voxel
 - [x] Conservative Rasterization
-- [ ] Compute two light bounces
-- [ ] Emissive materials
-- [ ] Possibly use assimp for a PBR based pipeline
-- [ ] Sparse voxel octree
+- [x] Emissive materials
+- [ ] Dynamic mesh voxelization
+- [ ] Compute two light bounces ??
+- [ ] Possibly use assimp for a PBR based pipeline ??
+- [ ] Sparse voxel octree ??
 
 ## ImGui Editor Options
 
@@ -27,7 +28,7 @@ OpenGL engine for rendering scenes with global illumination in real-time using a
 - [ ] Move objects around
 - [x] Change voxel map resolution
 
-## Benchmark
+## Benchmark (needs to be redone)
 
 The following benchmark is obtained on a single NVIDIA RTX 4090 GPU.
 

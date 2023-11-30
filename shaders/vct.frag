@@ -1,6 +1,5 @@
 #version 440 core
 #define PI 3.141592653589793
-#define VOXEL_SIZE (2000/512)
 #define MIPMAP_HARDCAP 6.0f
 
 in vec3 worldPosFrag;
@@ -31,6 +30,7 @@ uniform sampler2D normalMap;
 /* Material */
 
 /* Settings */
+uniform int VOXEL_DIM;
 uniform bool hasDiffuseGI;
 uniform bool hasSpecularGI;
 /* Settings */
@@ -50,16 +50,18 @@ vec3 traceDiffuseCone(const vec3 from, vec3 direction){
   vec4 acc = vec4(0.0f);
   float dist = 1.0;
 
+	float VoxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
+
   while(dist < worldSizeHalf && acc.a < 1){
     vec3 c = from + dist * direction;
     vec3 coords = (c - worldCenter) / worldSizeHalf;
     coords = 0.5 * coords + 0.5;
-    float l = (1 + CONE_SPREAD * dist / VOXEL_SIZE);
+    float l = (1 + CONE_SPREAD * dist / VoxelSize);
     float level = log2(l);
     float ll = (level + 1) * (level + 1);
     vec4 voxel = textureLod(voxelTexture, coords, min(MIPMAP_HARDCAP, level)); 
     acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
-    dist += ll * VOXEL_SIZE * 2;
+    dist += ll * VoxelSize * 2;
 	}
 	return pow(acc.rgb * 2.0, vec3(1.5));
 }
@@ -78,7 +80,8 @@ vec3 indirectDiffuseLight(vec3 normal){
 	const vec3 corner2 = 0.5f * (ortho - ortho2);
 
 	// Find start position of trace (start with a bit of offset).
-	const vec3 N_OFFSET = normal * VOXEL_SIZE;
+	float VoxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
+	const vec3 N_OFFSET = normal * VoxelSize;
 	const vec3 C_ORIGIN = worldPosFrag + N_OFFSET;
 
 	vec3 acc = vec3(0);
@@ -112,10 +115,10 @@ vec3 indirectDiffuseLight(vec3 normal){
 }
 
 vec3 traceCone(vec3 from, vec3 direction, float aperture) {
-    float max_dist = 2.0 * worldSizeHalf;
+    float max_dist = worldSizeHalf / 4.0;
     vec4 acc       = vec4( 0.0 );
 
-		float VoxelSize = max_dist / 512.0;
+		float VoxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
     float offset = 2.0 * VoxelSize;
     float dist   = offset + VoxelSize;
 

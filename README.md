@@ -6,7 +6,7 @@ OpenGL engine for rendering scenes with global illumination in real-time using a
 - [x] Shadow map tight bound using AABB
 - [x] Additional Textures
 - [x] Specular Cones (kinda)
-- [ ] Interactive imgui interface to edit light, material and models
+- [x] Interactive imgui interface to edit light, material and models
 - [ ] Take atomic max of a colour for each voxel
 - [x] Conservative Rasterization
 - [ ] Compute two light bounces
@@ -16,16 +16,16 @@ OpenGL engine for rendering scenes with global illumination in real-time using a
 
 ## ImGui Editor Options
 
-- [ ] Move point light source around
-- [ ] Toggle between viewing modes:
-    - [ ] Visualization
-        - [ ] Shadows ??
-    - [ ] GI
-        - [ ] Indirect Diffuse
-        - [ ] Indirect Specular
-- [ ] Change material properties
+- [x] Move point light source around and change its color
+- [x] Toggle between viewing modes:
+    - [x] Visualization
+        - [x] Shadows
+    - [x] GI
+        - [x] Indirect Diffuse
+        - [x] Indirect Specular
+- [x] Change material properties
 - [ ] Move objects around
-- [ ] Change voxel map resolution
+- [x] Change voxel map resolution
 
 ## Benchmark
 

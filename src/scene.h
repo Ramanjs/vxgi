@@ -16,6 +16,7 @@ private:
   std::map<std::string, GLuint> textures;
   std::vector<Material> materials;
   float gMinX, gMinY, gMinZ, gMaxX, gMaxY, gMaxZ;
+  int floorIdx, curtainIdx;
 
   void loadTextureFromFile(const char *texturePath, const char *textureName);
   void computeTangentAndBitangent(GLfloat pos1x, GLfloat pos1y, GLfloat pos1z,
@@ -34,6 +35,11 @@ public:
   glm::vec3 getWorldCenter();
   float getWorldSize();
   std::vector<glm::vec3> getAABB();
+
+  glm::vec3 &getFloorSpecularRef() { return materials[floorIdx].ks; }
+  glm::vec3 &getFloorEmissiveRef() { return materials[floorIdx].ke; }
+  glm::vec3 &getCurtainSpecularRef() { return materials[curtainIdx].ks; }
+  glm::vec3 &getCurtainEmissiveRef() { return materials[curtainIdx].ke; }
 };
 
 #endif /* ifndef SCENE_H */

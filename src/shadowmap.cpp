@@ -45,7 +45,7 @@ void ShadowMap::computeLightSpaceAABB(Scene &scene, glm::mat4 &lightView) {
   AABB[5] = maxZ;
 }
 
-void ShadowMap::initShader(Scene &scene) {
+void ShadowMap::initShader(Scene &scene, glm::vec3 lightPosition) {
   depthMapShader.use();
   glm::mat4 modelT(1.0f);
   depthMapShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
@@ -62,11 +62,11 @@ void ShadowMap::initShader(Scene &scene) {
                             "lightSpaceMatrix");
 }
 
-void ShadowMap::generate(Scene &scene) {
+void ShadowMap::generate(Scene &scene, glm::vec3 lightPosition) {
   glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
   glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
   glClear(GL_DEPTH_BUFFER_BIT);
-  initShader(scene);
+  initShader(scene, lightPosition);
   scene.draw(depthMapShader, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

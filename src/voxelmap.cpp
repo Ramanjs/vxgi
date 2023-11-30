@@ -19,13 +19,19 @@ void VoxelMap::initTexture() {
   glBindTexture(GL_TEXTURE_3D, 0);
 }
 
+void VoxelMap::resizeTexture() {
+  glDeleteTextures(1, &voxelTexture);
+  initTexture();
+}
+
 void VoxelMap::clear() {
   GLuint clearColor = 0;
   glBindTexture(GL_TEXTURE_3D, voxelTexture);
   glClearTexImage(voxelTexture, 0, GL_RGBA, GL_UNSIGNED_BYTE, &clearColor);
 }
 
-void VoxelMap::voxelize(glm::vec3 lightPosition) {
+void VoxelMap::voxelize(glm::vec3 lightPosition, glm::vec3 lightColor,
+                        int hasShadows) {
   clear();
 
   glm::mat4 modelT = glm::mat4(1.0f);
@@ -45,11 +51,15 @@ void VoxelMap::voxelize(glm::vec3 lightPosition) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_3D, voxelTexture);
 
+  GLuint shads = hasShadows;
+  voxelizeShader.setUniform(uniformType::i1, &shads, "hasShadows");
   voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(worldCenter),
                             "worldCenter");
   voxelizeShader.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
   voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
                             "lightPosition");
+  voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(lightColor),
+                            "lightColor");
   voxelizeShader.setUniform(uniformType::mat4x4,
                             glm::value_ptr(shadowMap.getLightSpaceMatrix()),
                             "lightSpaceMatrix");
@@ -74,19 +84,23 @@ void VoxelMap::voxelize(glm::vec3 lightPosition) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
+void VoxelMap::render(Camera &camera, glm::vec3 lightPosition,
+                      glm::vec3 lightColor, int diffuseGI, int specularGI) {
   glm::mat4 modelT = glm::mat4(1.0f);
   glm::vec3 worldCenter = scene.getWorldCenter();
   GLfloat worldSizeHalf = scene.getWorldSize() / 2.0;
   glm::vec3 camPosition = camera.position;
   glm::mat4 viewT = camera.getViewMatrix();
-  glm::mat4 projectionT =
-      glm::perspective(glm::radians(camera.zoom),
-                       (GLfloat)SCR_WIDTH / (GLfloat)SCR_HEIGHT, 0.1f, 5000.0f);
+  glm::mat4 projectionT = glm::perspective(
+      glm::radians(camera.zoom),
+      (GLfloat)VIEWPORT_WIDTH / (GLfloat)VIEWPORT_HEIGHT, 0.1f, 5000.0f);
   renderShader.use();
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+  renderShader.setUniform(uniformType::i1, &VOXEL_DIM, "VOXEL_DIM");
   renderShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
                           "lightPosition");
+  renderShader.setUniform(uniformType::fv3, glm::value_ptr(lightColor),
+                          "lightColor");
   renderShader.setUniform(uniformType::fv3, glm::value_ptr(worldCenter),
                           "worldCenter");
   renderShader.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
@@ -98,6 +112,8 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT),
                           "P");
+  renderShader.setUniform(uniformType::i1, &diffuseGI, "hasDiffuseGI");
+  renderShader.setUniform(uniformType::i1, &specularGI, "hasSpecularGI");
 
   GLuint voxelTextureUnit = 0;
   renderShader.setUniform(uniformType::i1, &voxelTextureUnit, "voxelTexture");
@@ -107,7 +123,10 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition) {
   renderShader.setUniform(uniformType::i1, &shadowMapUnit, "shadowMap");
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, shadowMap.getDepthMapTexture());
+  glViewport(EDITOR_WIDTH, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   scene.draw(renderShader, 2);
+  // reset viewport
+  glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }
 
 void VoxelMap::visualize(Camera &camera) {
@@ -122,8 +141,6 @@ void VoxelMap::visualize(Camera &camera) {
                                  "worldCenter");
   visualizationShader.setUniform(uniformType::f1, &worldSizeHalf,
                                  "worldSizeHalf");
-  visualizationShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT),
-                                 "M");
   visualizationShader.setUniform(uniformType::fv3, glm::value_ptr(worldCenter),
                                  "worldCenter");
   visualizationShader.setUniform(uniformType::f1, &worldSizeHalf,

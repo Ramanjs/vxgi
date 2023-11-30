@@ -13,26 +13,24 @@ private:
   glm::mat4 lightProjection;
   Shader depthMapShader;
   Shader depthMapDebugShader;
-  glm::vec3 &lightPosition;
   glm::mat4 lightSpaceMatrix;
   GLfloat AABB[6];
   GLuint quadVAO;
 
   void initTexture();
-  void initShader(Scene &scene);
+  void initShader(Scene &scene, glm::vec3 lightPosition);
   void computeLightSpaceAABB(Scene &scene, glm::mat4 &lightView);
   void renderQuad();
 
 public:
   ShadowMap(const char *vsPath, const char *fsPath, const char *debugVsPath,
-            const char *debugFsPath, glm::vec3 &_lightPosition)
+            const char *debugFsPath)
       : depthMapShader(vsPath, fsPath),
-        depthMapDebugShader(debugVsPath, debugFsPath),
-        lightPosition(_lightPosition), quadVAO(0) {
+        depthMapDebugShader(debugVsPath, debugFsPath), quadVAO(0) {
     initTexture();
   }
 
-  void generate(Scene &scene);
+  void generate(Scene &scene, glm::vec3 lightPosition);
   void render();
   glm::mat4 &getLightSpaceMatrix() { return lightSpaceMatrix; }
   GLuint getDepthMapTexture() { return depthMapTexure; }

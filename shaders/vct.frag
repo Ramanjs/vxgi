@@ -30,6 +30,11 @@ uniform sampler2D specularMap;
 uniform sampler2D normalMap;
 /* Material */
 
+/* Settings */
+uniform bool hasDiffuseGI;
+uniform bool hasSpecularGI;
+/* Settings */
+
 out vec4 outColor;
 
 vec3 orthogonal(vec3 u){
@@ -191,10 +196,14 @@ void main() {
   float shadow = shadowCalculation(lightSpacePosFrag, lightDir, normal);
   vec3 lighting = (1.0 - shadow) * (diffuse) * color;
 
-  vec3 diffuseGI = color * indirectDiffuseLight(normal);
-	lighting += color * diffuseGI;
-	vec3 specularGI = indirectSpecularLight(viewDir, normal);
-	lighting += (specReflectivity * specularGI);
+	if (hasDiffuseGI) {
+		vec3 diffuseGI = color * indirectDiffuseLight(normal);
+		lighting += color * diffuseGI;
+	}
+	if (hasSpecularGI) {
+		vec3 specularGI = indirectSpecularLight(viewDir, normal);
+		lighting += (specReflectivity * specularGI);
+	}
 
   outColor = vec4(lighting, 1.0);
 }

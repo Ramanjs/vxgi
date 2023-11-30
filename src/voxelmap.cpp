@@ -80,7 +80,7 @@ void VoxelMap::voxelize(glm::vec3 lightPosition, glm::vec3 lightColor,
 }
 
 void VoxelMap::render(Camera &camera, glm::vec3 lightPosition,
-                      glm::vec3 lightColor) {
+                      glm::vec3 lightColor, int diffuseGI, int specularGI) {
   glm::mat4 modelT = glm::mat4(1.0f);
   glm::vec3 worldCenter = scene.getWorldCenter();
   GLfloat worldSizeHalf = scene.getWorldSize() / 2.0;
@@ -106,6 +106,8 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition,
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(viewT), "V");
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(projectionT),
                           "P");
+  renderShader.setUniform(uniformType::i1, &diffuseGI, "hasDiffuseGI");
+  renderShader.setUniform(uniformType::i1, &specularGI, "hasSpecularGI");
 
   GLuint voxelTextureUnit = 0;
   renderShader.setUniform(uniformType::i1, &voxelTextureUnit, "voxelTexture");

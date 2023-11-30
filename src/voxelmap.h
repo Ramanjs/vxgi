@@ -37,7 +37,8 @@ public:
 
   void voxelize(glm::vec3 lightPosition, glm::vec3 lightColor, int hasShadows);
   void visualize(Camera &camera);
-  void render(Camera &camera, glm::vec3 lightPosition, glm::vec3 lightColor);
+  void render(Camera &camera, glm::vec3 lightPosition, glm::vec3 lightColor,
+              int diffuseGI, int specularGI);
 
 private:
   void initTexture();

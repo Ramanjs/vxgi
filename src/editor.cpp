@@ -81,7 +81,18 @@ void Editor::renderEditor() {
     ImGui::Separator();
     ImGui::Text("Voxel Map Resolution");
     const char resolutionLabels[100] = "x512\0x256\0x128\0x64";
-    ImGui::Combo("", &voxelRes, resolutionLabels);
+    if (ImGui::Combo("", &voxelRes, resolutionLabels)) {
+      revoxelize = true;
+      if (voxelRes == 0)
+        VOXEL_DIM = 512;
+      if (voxelRes == 1)
+        VOXEL_DIM = 256;
+      if (voxelRes == 2)
+        VOXEL_DIM = 128;
+      if (voxelRes == 3)
+        VOXEL_DIM = 64;
+      voxelmap.resizeTexture();
+    }
 
     ImGui::Separator();
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,

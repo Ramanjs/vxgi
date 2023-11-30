@@ -96,6 +96,7 @@ void VoxelMap::render(Camera &camera, glm::vec3 lightPosition,
       (GLfloat)VIEWPORT_WIDTH / (GLfloat)VIEWPORT_HEIGHT, 0.1f, 5000.0f);
   renderShader.use();
   renderShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+  renderShader.setUniform(uniformType::i1, &VOXEL_DIM, "VOXEL_DIM");
   renderShader.setUniform(uniformType::fv3, glm::value_ptr(lightPosition),
                           "lightPosition");
   renderShader.setUniform(uniformType::fv3, glm::value_ptr(lightColor),

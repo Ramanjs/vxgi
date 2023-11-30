@@ -96,6 +96,8 @@ void Shader::attachAndLinkProgram() {
 }
 
 Shader::Shader(const char *vsPath, const char *fsPath, const char *gsPath) {
+  vsName = vsPath;
+  fsName = fsPath;
   if (vsPath)
     vs = initShader(vsPath, GL_VERTEX_SHADER);
   if (fsPath)
@@ -112,20 +114,22 @@ void Shader::use() { glUseProgram(program); }
 
 void Shader::setUniform(uniformType type, void *param, char *name) {
   GLint loc = glGetUniformLocation(program, name);
+  if (loc == -1) {
+    std::cout << "Failed to bind location: " << fsName << ", " << name
+              << std::endl;
+  }
 
   if (type == uniformType::i1) {
-    glUniform1i(glGetUniformLocation(program, name), *((int *)param));
+    glUniform1i(loc, *((int *)param));
   } else if (type == uniformType::f1) {
-    glUniform1f(glGetUniformLocation(program, name), *((float *)param));
+    glUniform1f(loc, *((float *)param));
   } else if (type == uniformType::fv3) {
-    glUniform3fv(glGetUniformLocation(program, name), 1, (float *)param);
+    glUniform3fv(loc, 1, (float *)param);
   } else if (type == uniformType::fv4) {
-    glUniform4fv(glGetUniformLocation(program, name), 1, (float *)param);
+    glUniform4fv(loc, 1, (float *)param);
   } else if (type == uniformType::mat4x4) {
-    glUniformMatrix4fv(glGetUniformLocation(program, name), 1, GL_FALSE,
-                       (float *)param);
+    glUniformMatrix4fv(loc, 1, GL_FALSE, (float *)param);
   } else if (type == uniformType::mat3x3) {
-    glUniformMatrix3fv(glGetUniformLocation(program, name), 1, GL_FALSE,
-                       (float *)param);
+    glUniformMatrix3fv(loc, 1, GL_FALSE, (float *)param);
   }
 }

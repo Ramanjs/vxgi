@@ -69,5 +69,27 @@ GLFWwindow *setupWindow(int width, int height) {
   }
   std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
+  if (GLEW_NV_conservative_raster) {
+    glEnable(0x9346);
+    std::cout << "Hardware conservative rasterization enabled" << std::endl;
+  }
+
+  const char *glsl_version = "#version 440";
+  // Setup Dear ImGui context
+  // IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io = ImGui::GetIO();
+  (void)io;
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  // ImGui::StyleColorsLight();
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
   return window;
 }

@@ -9,8 +9,6 @@ set(IMGUI_SRC
 	"${PROJECT_SOURCE_DIR}/imgui_demo.cpp"
 	"${PROJECT_SOURCE_DIR}/imgui_draw.cpp"
 	"${PROJECT_SOURCE_DIR}/imgui_widgets.cpp"
-  #"${PROJECT_SOURCE_DIR}/*.h"
-  #"${PROJECT_SOURCE_DIR}/*.cpp"
 )
 
 add_library(${PROJECT_NAME} STATIC ${IMGUI_SRC})

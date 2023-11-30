@@ -254,6 +254,7 @@ void Scene::draw(Shader &shader, int textureUnit) {
     int zero = 0, one = 1, mapUnit = textureUnit;
     shader.setUniform(uniformType::fv3, glm::value_ptr(material.kd), "kd");
     shader.setUniform(uniformType::fv3, glm::value_ptr(material.ks), "ks");
+    shader.setUniform(uniformType::fv3, glm::value_ptr(material.ke), "ke");
     shader.setUniform(uniformType::f1, &(material.shininess), "shininess");
     shader.setUniform(uniformType::i1, &zero, "hasDiffuseMap");
     shader.setUniform(uniformType::i1, &zero, "hasSpecularMap");

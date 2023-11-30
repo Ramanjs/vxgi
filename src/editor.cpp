@@ -108,6 +108,7 @@ void Editor::renderEditor() {
       ImGui::SliderFloat("Emissive", &floorEmissive, 0.0f, 1.0f);
       if (ImGui::IsItemEdited()) {
         floorEmissiveRef = glm::vec3(floorEmissive);
+        revoxelize = true;
       }
       ImGui::TreePop();
     }
@@ -119,6 +120,7 @@ void Editor::renderEditor() {
       ImGui::SliderFloat("Emissive", &curtainEmissive, 0.0f, 1.0f);
       if (ImGui::IsItemEdited()) {
         curtainEmissiveRef = glm::vec3(curtainEmissive);
+        revoxelize = true;
       }
       ImGui::TreePop();
     }

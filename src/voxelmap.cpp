@@ -19,6 +19,11 @@ void VoxelMap::initTexture() {
   glBindTexture(GL_TEXTURE_3D, 0);
 }
 
+void VoxelMap::resizeTexture() {
+  glDeleteTextures(1, &voxelTexture);
+  initTexture();
+}
+
 void VoxelMap::clear() {
   GLuint clearColor = 0;
   glBindTexture(GL_TEXTURE_3D, voxelTexture);

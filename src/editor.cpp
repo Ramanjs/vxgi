@@ -102,12 +102,24 @@ void Editor::renderEditor() {
   if (ImGui::CollapsingHeader("Models")) {
     if (ImGui::TreeNode("Floor")) {
       ImGui::SliderFloat("Specular", &floorSpecular, 0.0f, 1.0f);
+      if (ImGui::IsItemEdited()) {
+        floorSpecularRef = glm::vec3(floorSpecular);
+      }
       ImGui::SliderFloat("Emissive", &floorEmissive, 0.0f, 1.0f);
+      if (ImGui::IsItemEdited()) {
+        floorEmissiveRef = glm::vec3(floorEmissive);
+      }
       ImGui::TreePop();
     }
     if (ImGui::TreeNode("Curtain")) {
       ImGui::SliderFloat("Specular", &curtainSpecular, 0.0f, 1.0f);
+      if (ImGui::IsItemEdited()) {
+        curtainSpecularRef = glm::vec3(curtainSpecular);
+      }
       ImGui::SliderFloat("Emissive", &curtainEmissive, 0.0f, 1.0f);
+      if (ImGui::IsItemEdited()) {
+        curtainEmissiveRef = glm::vec3(curtainEmissive);
+      }
       ImGui::TreePop();
     }
     if (ImGui::TreeNode("Dragon")) {

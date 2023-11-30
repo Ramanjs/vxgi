@@ -27,9 +27,13 @@ private:
   bool diffuseGI;
   bool specularGI;
   float floorSpecular;
+  glm::vec3 &floorSpecularRef;
   float floorEmissive;
+  glm::vec3 &floorEmissiveRef;
   float curtainSpecular;
+  glm::vec3 &curtainSpecularRef;
   float curtainEmissive;
+  glm::vec3 &curtainEmissiveRef;
   float dragonSpecular;
   float dragonEmissive;
   glm::vec3 lightPosition;
@@ -40,7 +44,11 @@ public:
   Editor(Scene &_scene, ShadowMap &_shadowMap, VoxelMap &_voxelmap,
          Camera &_camera)
       : engineMode(EngineMode::RENDER), shadowMap(_shadowMap), scene(_scene),
-        voxelmap(_voxelmap), camera(_camera) {
+        voxelmap(_voxelmap), camera(_camera),
+        floorSpecularRef(_scene.getFloorSpecularRef()),
+        floorEmissiveRef(_scene.getFloorEmissiveRef()),
+        curtainSpecularRef(_scene.getCurtainSpecularRef()),
+        curtainEmissiveRef(_scene.getCurtainEmissiveRef()) {
     lightPosition = glm::vec3(200.0f, 2000.0f, 450.0f);
     lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     viewMode = true, voxelRes = 0, hasShadows = true, diffuseGI = true,

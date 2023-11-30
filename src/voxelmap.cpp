@@ -25,7 +25,8 @@ void VoxelMap::clear() {
   glClearTexImage(voxelTexture, 0, GL_RGBA, GL_UNSIGNED_BYTE, &clearColor);
 }
 
-void VoxelMap::voxelize(glm::vec3 lightPosition, glm::vec3 lightColor) {
+void VoxelMap::voxelize(glm::vec3 lightPosition, glm::vec3 lightColor,
+                        int hasShadows) {
   clear();
 
   glm::mat4 modelT = glm::mat4(1.0f);
@@ -45,6 +46,8 @@ void VoxelMap::voxelize(glm::vec3 lightPosition, glm::vec3 lightColor) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_3D, voxelTexture);
 
+  GLuint shads = hasShadows;
+  voxelizeShader.setUniform(uniformType::i1, &shads, "hasShadows");
   voxelizeShader.setUniform(uniformType::fv3, glm::value_ptr(worldCenter),
                             "worldCenter");
   voxelizeShader.setUniform(uniformType::f1, &worldSizeHalf, "worldSizeHalf");
@@ -130,8 +133,6 @@ void VoxelMap::visualize(Camera &camera) {
                                  "worldCenter");
   visualizationShader.setUniform(uniformType::f1, &worldSizeHalf,
                                  "worldSizeHalf");
-  visualizationShader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT),
-                                 "M");
   visualizationShader.setUniform(uniformType::fv3, glm::value_ptr(worldCenter),
                                  "worldCenter");
   visualizationShader.setUniform(uniformType::f1, &worldSizeHalf,

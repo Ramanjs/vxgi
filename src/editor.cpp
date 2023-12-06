@@ -129,16 +129,19 @@ void Editor::renderEditor() {
       ImGui::SliderFloat("x", glm::value_ptr(scene.dynamicMeshPosition),
                          -200.0f, 200.0f);
       if (ImGui::IsItemEdited()) {
+        regenShadowMap = true;
         revoxelize = true;
       }
       ImGui::SliderFloat("y", glm::value_ptr(scene.dynamicMeshPosition) + 1,
                          -200.0f, 200.0f);
       if (ImGui::IsItemEdited()) {
+        regenShadowMap = true;
         revoxelize = true;
       }
       ImGui::SliderFloat("z", glm::value_ptr(scene.dynamicMeshPosition) + 2,
                          -200.0f, 200.0f);
       if (ImGui::IsItemEdited()) {
+        regenShadowMap = true;
         revoxelize = true;
       }
       ImGui::SliderFloat("Specular", &dynamicSpecular, 0.0f, 1.0f);

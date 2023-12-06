@@ -7,10 +7,10 @@ OpenGL engine for rendering scenes with global illumination in real-time using a
 - [x] Additional Textures
 - [x] Specular Cones
 - [x] Interactive imgui interface to edit light, material and models
-- [ ] Take atomic max of a colour for each voxel
 - [x] Conservative Rasterization
 - [x] Emissive materials
-- [ ] Dynamic mesh voxelization
+- [x] Dynamic mesh voxelization
+- [ ] Take atomic max of a colour for each voxel ??
 - [ ] Compute two light bounces ??
 - [ ] Possibly use assimp for a PBR based pipeline ??
 - [ ] Sparse voxel octree ??
@@ -25,7 +25,7 @@ OpenGL engine for rendering scenes with global illumination in real-time using a
         - [x] Indirect Diffuse
         - [x] Indirect Specular
 - [x] Change material properties
-- [ ] Move objects around
+- [x] Move objects around
 - [x] Change voxel map resolution
 
 ## Benchmark (needs to be redone)

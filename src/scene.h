@@ -12,7 +12,7 @@
 
 class Scene {
 private:
-  std::vector<Mesh> meshes; 
+  std::vector<Mesh> meshes;
   std::map<std::string, GLuint> textures;
   std::vector<Material> materials;
   float gMinX, gMinY, gMinZ, gMaxX, gMaxY, gMaxZ;
@@ -29,7 +29,9 @@ private:
 public:
   Scene()
       : gMinX(FLT_MAX), gMinY(FLT_MAX), gMinZ(FLT_MAX), gMaxX(FLT_MIN),
-        gMaxY(FLT_MIN), gMaxZ(FLT_MIN) {dynamicMeshPosition = glm::vec3(0.0f, 0.0f, 10.0f);};
+        gMaxY(FLT_MIN), gMaxZ(FLT_MIN) {
+    dynamicMeshPosition = glm::vec3(0.0f, 0.0f, 10.0f);
+  };
   glm::vec3 dynamicMeshPosition;
   void loadObj(const char *textureDir, const char *filePath, int isDynamic);
   void draw(Shader &shader, int textureUnit);

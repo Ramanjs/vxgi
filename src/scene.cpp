@@ -42,7 +42,8 @@ void Scene::loadTextureFromFile(const char *texturePath,
   textures.insert(std::make_pair(textureName, textureId));
 }
 
-void Scene::loadObj(const char *textureDir, const char *filePath, int isDynamic) {
+void Scene::loadObj(const char *textureDir, const char *filePath,
+                    int isDynamic) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> tmaterials;

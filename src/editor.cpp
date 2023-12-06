@@ -124,19 +124,32 @@ void Editor::renderEditor() {
       }
       ImGui::TreePop();
     }
-    if (ImGui::TreeNode("Dragon")) {
+    if (ImGui::TreeNode("Bunny")) {
       ImGui::Text("Position");
       ImGui::SliderFloat("x", glm::value_ptr(scene.dynamicMeshPosition),
                          -200.0f, 200.0f);
+      if (ImGui::IsItemEdited()) {
+        revoxelize = true;
+      }
       ImGui::SliderFloat("y", glm::value_ptr(scene.dynamicMeshPosition) + 1,
                          -200.0f, 200.0f);
+      if (ImGui::IsItemEdited()) {
+        revoxelize = true;
+      }
       ImGui::SliderFloat("z", glm::value_ptr(scene.dynamicMeshPosition) + 2,
                          -200.0f, 200.0f);
       if (ImGui::IsItemEdited()) {
         revoxelize = true;
       }
-      ImGui::SliderFloat("Specular", &dragonSpecular, 0.0f, 1.0f);
-      ImGui::SliderFloat("Emissive", &dragonEmissive, 0.0f, 1.0f);
+      ImGui::SliderFloat("Specular", &dynamicSpecular, 0.0f, 1.0f);
+      if (ImGui::IsItemEdited()) {
+        dynamicSpecularRef = glm::vec3(dynamicSpecular);
+      }
+      ImGui::SliderFloat("Emissive", &dynamicEmissive, 0.0f, 2.0f);
+      if (ImGui::IsItemEdited()) {
+        dynamicEmissiveRef = glm::vec3(dynamicEmissive);
+        revoxelize = true;
+      }
       ImGui::TreePop();
     }
   }

@@ -34,11 +34,12 @@ private:
   glm::vec3 &curtainSpecularRef;
   float curtainEmissive;
   glm::vec3 &curtainEmissiveRef;
-  float dragonSpecular;
-  float dragonEmissive;
+  float dynamicSpecular;
+  glm::vec3 &dynamicSpecularRef;
+  float dynamicEmissive;
+  glm::vec3 &dynamicEmissiveRef;
   glm::vec3 lightPosition;
   glm::vec3 lightColor;
-  // glm::vec3 dragonPosition;
 
 public:
   Editor(Scene &_scene, ShadowMap &_shadowMap, VoxelMap &_voxelmap,
@@ -48,13 +49,13 @@ public:
         floorSpecularRef(_scene.getFloorSpecularRef()),
         floorEmissiveRef(_scene.getFloorEmissiveRef()),
         curtainSpecularRef(_scene.getCurtainSpecularRef()),
-        curtainEmissiveRef(_scene.getCurtainEmissiveRef()) {
+        curtainEmissiveRef(_scene.getCurtainEmissiveRef()),
+        dynamicSpecularRef(_scene.getDynamicSpecularRef()),
+        dynamicEmissiveRef(_scene.getDynamicEmissiveRef()) {
     lightPosition = glm::vec3(200.0f, 2000.0f, 450.0f);
     lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     viewMode = true, voxelRes = 0, hasShadows = true, diffuseGI = true,
     specularGI = true, revoxelize = true, regenShadowMap = true;
-
-    // dragonPosition = glm::vec3(100.0f, 0.0f, 0.0f);
   }
 
   void processCameraInput(GLFWwindow *window);

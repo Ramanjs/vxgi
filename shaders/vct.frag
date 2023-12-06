@@ -1,6 +1,5 @@
 #version 440 core
-#define PI 3.141592653589793
-#define MIPMAP_HARDCAP 6.0f
+#define MIPMAP_CAP 7.0f
 
 in vec3 worldPosFrag;
 in vec3 normalFrag;
@@ -40,55 +39,47 @@ out vec4 outColor;
 
 vec3 orthogonal(vec3 u){
 	u = normalize(u);
-	vec3 v = vec3(0.99146, 0.11664, 0.05832); // Pick any normalized vector.
+	vec3 v = normalize(vec3(1));
 	return abs(dot(u, v)) > 0.99999f ? cross(u, vec3(0, 1, 0)) : cross(u, v);
 }
 
 vec3 traceDiffuseCone(const vec3 from, vec3 direction){
   direction = normalize(direction);
-  const float CONE_SPREAD = 0.325;
+  const float aperture = 0.767;
 
   vec4 acc = vec4(0.0f);
   float dist = 1.0;
 
-	float VoxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
+	float voxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
 
   while(dist < worldSizeHalf && acc.a < 1){
-    vec3 c = from + dist * direction;
-    vec3 coords = (c - worldCenter) / worldSizeHalf;
+    vec3 conePosition = from + dist * direction;
+    vec3 coords = (conePosition - worldCenter) / worldSizeHalf;
     coords = 0.5 * coords + 0.5;
-    float l = (1 + CONE_SPREAD * dist / VoxelSize);
-    float level = log2(l);
-    float ll = (level + 1) * (level + 1);
-    vec4 voxel = textureLod(voxelTexture, coords, min(MIPMAP_HARDCAP, level)); 
-    acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
-    dist += ll * VoxelSize * 2;
+    float level = log2(1 + aperture * dist / voxelSize);
+    float lsquared = (level + 1) * (level + 1);
+    vec4 voxel = textureLod(voxelTexture, coords, min(MIPMAP_CAP, level)); 
+    acc += 0.075 * lsquared * voxel * pow(1 - voxel.a, 2);
+    dist += lsquared * voxelSize * 2;
 	}
-	return pow(acc.rgb * 2.0, vec3(1.5));
+	return acc.rgb * 2.0;
 }
 
 vec3 indirectDiffuseLight(vec3 normal){
-	const float ANGLE_MIX = 0.5f; // Angle mix (1.0f => orthogonal direction, 0.0f => direction of normal).
-
+	const float ANGLE_MIX = 0.5f;
 	const float w[3] = {1.0, 1.0, 1.0};
 
-	// Find a base for the side cones with the normal as one of its base vectors.
 	const vec3 ortho = normalize(orthogonal(normal));
 	const vec3 ortho2 = normalize(cross(ortho, normal));
 
-	// Find base vectors for the corner cones too.
-	const vec3 corner = 0.5f * (ortho + ortho2);
-	const vec3 corner2 = 0.5f * (ortho - ortho2);
-
-	// Find start position of trace (start with a bit of offset).
-	float VoxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
-	const vec3 N_OFFSET = normal * VoxelSize;
-	const vec3 C_ORIGIN = worldPosFrag + N_OFFSET;
+	float voxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
+	const vec3 offset = normal * voxelSize;
+	const vec3 coneOrigin = worldPosFrag + offset;
 
 	vec3 acc = vec3(0);
 
 	// Trace front cone
-	acc += w[0] * traceDiffuseCone(C_ORIGIN, normal);
+	acc += w[0] * traceDiffuseCone(coneOrigin, normal);
 
 	// Trace 4 side cones.
 	const vec3 s1 = mix(normal, ortho, ANGLE_MIX);
@@ -96,45 +87,32 @@ vec3 indirectDiffuseLight(vec3 normal){
 	const vec3 s3 = mix(normal, ortho2, ANGLE_MIX);
 	const vec3 s4 = mix(normal, -ortho2, ANGLE_MIX);
 
-	acc += w[1] * traceDiffuseCone(C_ORIGIN, s1);
-	acc += w[1] * traceDiffuseCone(C_ORIGIN, s2);
-	acc += w[1] * traceDiffuseCone(C_ORIGIN, s3);
-	acc += w[1] * traceDiffuseCone(C_ORIGIN, s4);
-
-	// Trace 4 corner cones.
-	const vec3 c1 = mix(normal, corner, ANGLE_MIX);
-	const vec3 c2 = mix(normal, -corner, ANGLE_MIX);
-	const vec3 c3 = mix(normal, corner2, ANGLE_MIX);
-	const vec3 c4 = mix(normal, -corner2, ANGLE_MIX);
-
-	acc += w[2] * traceDiffuseCone(C_ORIGIN, c1);
-	acc += w[2] * traceDiffuseCone(C_ORIGIN, c2);
-	acc += w[2] * traceDiffuseCone(C_ORIGIN, c3);
-	acc += w[2] * traceDiffuseCone(C_ORIGIN, c4);
+	acc += w[1] * traceDiffuseCone(coneOrigin, s1);
+	acc += w[1] * traceDiffuseCone(coneOrigin, s2);
+	acc += w[1] * traceDiffuseCone(coneOrigin, s3);
+	acc += w[1] * traceDiffuseCone(coneOrigin, s4);
 
 	return acc;
 }
 
-vec3 traceCone(vec3 from, vec3 direction, float aperture) {
+vec3 traceSpecularCone(vec3 from, vec3 direction, float aperture) {
     float max_dist = worldSizeHalf / 4.0;
-    vec4 acc       = vec4( 0.0 );
+    vec4 acc = vec4( 0.0 );
 
-		float VoxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
-    float offset = 2.0 * VoxelSize;
-    float dist   = offset + VoxelSize;
+		float voxelSize = 2.0 * worldSizeHalf / VOXEL_DIM;
+    float offset = 2.0 * voxelSize;
+    float dist = offset + voxelSize;
 
-    while ( acc.a < 1.0 && dist < max_dist )
-    {
+    while (acc.a < 1.0 && dist < max_dist) {
         vec3 conePosition = from + direction * dist;
-        float diameter    = 2.0 * aperture * dist;
-        float mipLevel    = log2( diameter / VoxelSize );
+        float diameter = 2.0 * aperture * dist;
+        float level = log2(diameter / voxelSize);
 
-        vec3 coords = ( conePosition - worldCenter ) / worldSizeHalf;
-        coords      = 0.5 * coords + 0.5;
+        vec3 coords = (conePosition - worldCenter) / worldSizeHalf;
+        coords = 0.5 * coords + 0.5;
 
-        vec4 voxel = textureLod( voxelTexture, coords, min(MIPMAP_HARDCAP, mipLevel ));
-        acc += ( 1.0 - acc.a ) * voxel;
-
+        vec4 voxel = textureLod(voxelTexture, coords, min(MIPMAP_CAP, level));
+        acc += (1.0 - acc.a) * voxel;
         dist += 0.5 * diameter;
     }
 
@@ -142,12 +120,10 @@ vec3 traceCone(vec3 from, vec3 direction, float aperture) {
 }
 
 vec3 indirectSpecularLight(vec3 viewDirection, vec3 N) {
-    float aperture = 0.0374533;
-
-    aperture = clamp( tan( 0.5 * PI * 0.5 ), aperture, 0.5 * PI );
+    float aperture = 0.07;
 
 		const vec3 reflection = normalize(reflect(-viewDirection, N));
-    vec3 specular = traceCone( worldPosFrag, reflection, 0.07 );
+    vec3 specular = traceSpecularCone(worldPosFrag, reflection, aperture);
 
     return specular;
 }
@@ -201,10 +177,12 @@ void main() {
   vec3 lighting = (1.0 - shadow) * (diffuse) * color;
 	lighting += ke * color;
 
+	// diffuse GI
 	if (hasDiffuseGI) {
 		vec3 diffuseGI = color * indirectDiffuseLight(normal);
-		lighting += color * diffuseGI;
+		lighting += diffuseGI;
 	}
+	// specular GI
 	if (hasSpecularGI) {
 		vec3 specularGI = indirectSpecularLight(viewDir, normal);
 		lighting += (specReflectivity * specularGI);

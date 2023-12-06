@@ -42,7 +42,7 @@ void Scene::loadTextureFromFile(const char *texturePath,
   textures.insert(std::make_pair(textureName, textureId));
 }
 
-void Scene::loadObj(const char *textureDir, const char *filePath) {
+void Scene::loadObj(const char *textureDir, const char *filePath, int isDynamic) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> tmaterials;
@@ -200,6 +200,7 @@ void Scene::loadObj(const char *textureDir, const char *filePath) {
     mesh.vao = 0;
     mesh.vbo = 0;
     mesh.materialId = shapes[s].mesh.material_ids[0];
+    mesh.isDynamic = isDynamic;
     GLuint stride = 8;
     if (material.normalMap > 0) {
       stride += 6;
@@ -283,6 +284,14 @@ void Scene::draw(Shader &shader, int textureUnit) {
     glBindTexture(GL_TEXTURE_2D, material.normalMap);
     mapUnit = textureUnit + 2;
     shader.setUniform(uniformType::i1, &mapUnit, "normalMap");
+
+    if (mesh.isDynamic) {
+      // Adjust its model matrix
+      glm::mat4 modelT = glm::mat4(1.0f);
+      // get dragon position
+      modelT = glm::translate(modelT, glm::vec3(dynamicMeshPosition));
+      shader.setUniform(uniformType::mat4x4, glm::value_ptr(modelT), "M");
+    }
 
     glDrawArrays(GL_TRIANGLES, 0, 3 * mesh.numTriangles);
 

@@ -126,11 +126,14 @@ void Editor::renderEditor() {
     }
     if (ImGui::TreeNode("Dragon")) {
       ImGui::Text("Position");
-      ImGui::SliderFloat("x", glm::value_ptr(dragonPosition), -200.0f, 200.0f);
-      ImGui::SliderFloat("y", glm::value_ptr(dragonPosition) + 1, -200.0f,
+      ImGui::SliderFloat("x", glm::value_ptr(scene.dynamicMeshPosition), -200.0f, 200.0f);
+      ImGui::SliderFloat("y", glm::value_ptr(scene.dynamicMeshPosition) + 1, -200.0f,
                          200.0f);
-      ImGui::SliderFloat("z", glm::value_ptr(dragonPosition) + 2, -200.0f,
+      ImGui::SliderFloat("z", glm::value_ptr(scene.dynamicMeshPosition) + 2, -200.0f,
                          200.0f);
+      if (ImGui::IsItemEdited()) {
+        revoxelize = true;
+      }
       ImGui::SliderFloat("Specular", &dragonSpecular, 0.0f, 1.0f);
       ImGui::SliderFloat("Emissive", &dragonEmissive, 0.0f, 1.0f);
       ImGui::TreePop();

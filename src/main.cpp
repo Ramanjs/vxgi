@@ -16,7 +16,9 @@ int main() {
   GLFWwindow *window = setupWindow(SCR_WIDTH, SCR_HEIGHT);
 
   Scene scene = Scene();
-  scene.loadObj("assets/crytek-sponza/", "assets/crytek-sponza/sponza.obj");
+  scene.loadObj("assets/crytek-sponza/", "assets/crytek-sponza/sponza.obj", 0);
+  scene.loadObj("assets/", "assets/bunny.obj", 1);
+
   glm::vec3 lightPosition(200.0f, 2000.0f, 450.0f);
 
   ShadowMap shadowMap =

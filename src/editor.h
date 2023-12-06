@@ -38,7 +38,7 @@ private:
   float dragonEmissive;
   glm::vec3 lightPosition;
   glm::vec3 lightColor;
-  glm::vec3 dragonPosition;
+  // glm::vec3 dragonPosition;
 
 public:
   Editor(Scene &_scene, ShadowMap &_shadowMap, VoxelMap &_voxelmap,
@@ -53,6 +53,8 @@ public:
     lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     viewMode = true, voxelRes = 0, hasShadows = true, diffuseGI = true,
     specularGI = true, revoxelize = true, regenShadowMap = true;
+
+    // dragonPosition = glm::vec3(100.0f, 0.0f, 0.0f);
   }
 
   void processCameraInput(GLFWwindow *window);

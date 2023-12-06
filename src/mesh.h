@@ -8,6 +8,7 @@ public:
   GLuint vao, vbo;
   int numTriangles;
   size_t materialId;
+  int isDynamic;
 };
 
 #endif /* ifndef MESH_H */

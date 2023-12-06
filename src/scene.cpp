@@ -115,6 +115,14 @@ void Scene::loadObj(const char *textureDir, const char *filePath,
     Mesh mesh;
     std::vector<GLfloat> buffer;
     Material material = materials[shapes[s].mesh.material_ids[0]];
+    float scaleFactor = 1.0;
+
+    if (isDynamic) {
+      Material material = Material();
+      material.kd = glm::vec3(0.67, 0.84, 0.90);
+      materials.push_back(material);
+      scaleFactor = 40.0;
+    }
 
     for (size_t f = 0; f < shapes[s].mesh.indices.size() / 3; f++) {
       tinyobj::index_t idx0 = shapes[s].mesh.indices[3 * f + 0];
@@ -170,9 +178,9 @@ void Scene::loadObj(const char *textureDir, const char *filePath,
       }
 
       for (int k = 0; k < 3; k++) {
-        buffer.push_back(v[k][0]);
-        buffer.push_back(v[k][1]);
-        buffer.push_back(v[k][2]);
+        buffer.push_back(v[k][0] * scaleFactor);
+        buffer.push_back(v[k][1] * scaleFactor);
+        buffer.push_back(v[k][2] * scaleFactor);
         buffer.push_back(n[k][0]);
         buffer.push_back(n[k][1]);
         buffer.push_back(n[k][2]);
@@ -202,6 +210,11 @@ void Scene::loadObj(const char *textureDir, const char *filePath,
     mesh.vbo = 0;
     mesh.materialId = shapes[s].mesh.material_ids[0];
     mesh.isDynamic = isDynamic;
+    if (mesh.isDynamic) {
+      mesh.materialId = materials.size() - 1;
+      dynamicIdx = mesh.materialId;
+    }
+
     GLuint stride = 8;
     if (material.normalMap > 0) {
       stride += 6;

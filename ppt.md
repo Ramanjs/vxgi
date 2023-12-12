@@ -17,14 +17,7 @@ class: invert
   * Brute Force: more computing power!
   * Approximation: cone tracing
 
----
-
-## Motivation
-
-![bg left height:4in](images/ppt-motivation.jpg)
-* Video Games!
-
----
+--- 
 
 ## VXGI Pipeline
 
@@ -32,6 +25,14 @@ class: invert
 * Hybrid Rendering Pipeline
   * Rasterized primary rays for direct lighting
   * Cone Traced secondary rays for indirect GI
+
+---
+
+# THE VXGI ENGINE
+
+---
+
+![height:6in](images/ppt-loop.svg)
 
 ---
 
@@ -156,7 +157,7 @@ $$\alpha = \alpha + (1 - \alpha)\alpha_2$$
 
 ![height:4in](images/ppt-diffuse.png)
 
---- 
+---
 
 ## Indirect Specular Lighting
 
@@ -170,14 +171,6 @@ $$\alpha = \alpha + (1 - \alpha)\alpha_2$$
 
 ---
 
-# THE VXGI ENGINE
-
----
-
-![height:6in](images/ppt-loop.svg)
-
----
-
 # RESULTS
 
 ---
@@ -185,6 +178,5 @@ $$\alpha = \alpha + (1 - \alpha)\alpha_2$$
 ![height:8in](images/ppt-result.jpg)
 
 ---
-
 
 ![height:8in](images/ppt-emissive.jpg)

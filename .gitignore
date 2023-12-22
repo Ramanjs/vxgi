@@ -4,3 +4,4 @@ compile_commands.json
 .cache
 .idea
 imgui.ini
+*.html

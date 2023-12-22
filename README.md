@@ -1,6 +1,12 @@
 # interactive-global-illumination
 OpenGL engine for rendering scenes with global illumination in real-time using a voxel cone tracer.
 
+## Results
+
+![](/images/ppt-emissive.jpg)
+![](/images/ppt-result.jpg)
+![](/images/ppt-voxels.jpg)
+
 ## TODO:
 - [x] Refactor voxelization procedure into a separate class
 - [x] Shadow map tight bound using AABB
